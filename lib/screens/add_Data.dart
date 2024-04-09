@@ -56,6 +56,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
   TextEditingController _previousReadingController = TextEditingController();
   TextEditingController _currentReadingController = TextEditingController();
   TextEditingController _totalUnitsConsumedController = TextEditingController();
+  TextEditingController _perUnitChargeController = TextEditingController();
   TextEditingController _energyChargeController = TextEditingController();
   TextEditingController _meterRentController = TextEditingController();
   TextEditingController _gstController = TextEditingController();
@@ -121,9 +122,69 @@ class _AddDataScreenState extends State<AddDataScreen> {
   }
 
   @override
+  void dispose() {
+    _numberOfDaysController.dispose();
+    _totalUnitsConsumedController.dispose();
+    _perUnitChargeController.dispose();
+    _energyChargeController.dispose();
+    _meterRentController.dispose();
+    _gstController.dispose();
+    _totalAmountController.dispose();
+    super.dispose();
+  }
+
+  void _calculateNumberOfDays() {
+    if (selectedStart && selectedEnd) {
+      int numberOfDays = _endDate.difference(_startDate!).inDays + 1;
+      setState(() {
+        _numberOfDaysController.text = numberOfDays.toString();
+      });
+    } else {
+      setState(() {
+        _numberOfDaysController.text = '';
+      });
+    }
+  }
+
+  void _calculateEnergyCharge() {
+    double perUnitCharge =
+        double.tryParse(_perUnitChargeController.text) ?? 0.0;
+    double energyCharge = totalConsumed * perUnitCharge;
+    setState(() {
+      _energyChargeController.text = energyCharge.toStringAsFixed(2);
+    });
+  }
+
+  void _calculateTotalAmount() {
+    double energyCharge = double.tryParse(_energyChargeController.text) ?? 0;
+    double meterRent = double.tryParse(_meterRentController.text) ?? 0;
+    double gstPercentage = double.tryParse(_gstController.text) ?? 0;
+
+    double gstAmount = (meterRent * gstPercentage) / 100;
+    double totalAmount = energyCharge + meterRent + gstAmount;
+    double netPayable = totalAmount.roundToDouble();
+
+    setState(() {
+      _totalAmountController.text = totalAmount.toStringAsFixed(2);
+      _netPayableController.text = netPayable.toStringAsFixed(2);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Material(
-      child: Padding(
+      child:
+
+          // heading saying adding new bill to house number ${widget.houseNumber}
+          // SizedBox(
+          //   height: 20,
+          //   child: Text(
+          //     'Adding new bill to house number ${widget.houseNumber}',
+          //     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          //     softWrap: true, // Add this line to allow text to wrap
+          //   ),
+          // ),
+          Padding(
         padding: const EdgeInsets.all(20.0),
         child: ListView(
           children: [
@@ -179,6 +240,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                   setState(() {
                     _startDate = pickedDate;
                     selectedStart = true;
+                    _calculateNumberOfDays();
                   });
                 }
               },
@@ -203,6 +265,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                   setState(() {
                     _endDate = pickedDate;
                     selectedEnd = true;
+                    _calculateNumberOfDays();
                   });
                 }
               },
@@ -221,7 +284,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
             TextF(
               'Number of Days',
               _numberOfDaysController,
-              true,
+              false,
               keyboardType: TextInputType.number,
             ),
             SizedBox(
@@ -276,9 +339,25 @@ class _AddDataScreenState extends State<AddDataScreen> {
               height: 10,
             ),
             TextF(
+              'Per unit Charge',
+              _perUnitChargeController,
+              true,
+              onChanged: (value) {
+                _calculateEnergyCharge();
+                _calculateTotalAmount();
+              },
+              keyboardType: TextInputType.number,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            TextF(
               'Energy Charge',
               _energyChargeController,
-              true,
+              false,
+              onChanged: (value) {
+                _calculateTotalAmount();
+              },
               keyboardType: TextInputType.number,
             ),
             SizedBox(
@@ -288,15 +367,21 @@ class _AddDataScreenState extends State<AddDataScreen> {
               'Meter Rent',
               _meterRentController,
               true,
+              onChanged: (value) {
+                _calculateTotalAmount();
+              },
               keyboardType: TextInputType.number,
             ),
             SizedBox(
               height: 10,
             ),
             TextF(
-              'GST',
+              'GST %',
               _gstController,
               true,
+              onChanged: (value) {
+                _calculateTotalAmount();
+              },
               keyboardType: TextInputType.number,
             ),
             SizedBox(
@@ -305,7 +390,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
             TextF(
               'Total Amount',
               _totalAmountController,
-              true,
+              false,
               keyboardType: TextInputType.number,
             ),
             SizedBox(
@@ -314,7 +399,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
             TextF(
               'Net Payable',
               _netPayableController,
-              true,
+              false,
               keyboardType: TextInputType.number,
             ),
             SizedBox(
