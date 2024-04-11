@@ -1,6 +1,7 @@
 import 'package:electric/resources/changingDatabase.dart';
 import 'package:electric/screens/usersData.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HouseCard extends StatefulWidget {
   final int indexNumber;
@@ -47,77 +48,112 @@ class _HouseCardState extends State<HouseCard> {
     }
   }
 
+  String formatDate(String? date) {
+    if (date == null) return 'No data';
+    final dateTime = DateTime.parse(date);
+    return DateFormat('MMM dd, yyyy').format(dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Card(
-          elevation: 6, 
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListTile(
-              title: Row(
+        elevation: 6,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
                   Text(
                     'House Number: ${widget.houseNumber}',
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 22, 
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple, // Adjust to your color theme
+                    ),
                   ),
-                  Expanded(child: Container()),
-                  Text(
-                    widget.lastAdded != null
-                        ? 'Last Added: ${DateTime.parse(widget.lastAdded.toString()).toLocal().toString().split(' ')[0]}'
-                        : 'No data',
-                    style: const TextStyle(fontSize: 16),
-                  )
+                  Expanded(child: Container(),),
+                  Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple[100], // Light purple background
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Text(
+                    widget.lastAdded != null ? 'Last Added: ${formatDate(widget.lastAdded)}' : 'No data',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.deepPurple, // Text color
+                    ),
+                  ),
+                ),
                 ],
               ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: 6),
+              Text(
+                'Index: ${widget.indexNumber}',
+                style: TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Email: ${widget.email}',
+                style: TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                widget.lastAdded != null
+                    ? 'Last Added: ${formatDate(widget.lastAdded)}'
+                    : 'No data',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+
                 children: [
-                  const SizedBox(height: 8),
-                  Text(
-                    'Index: ${widget.indexNumber}',
-                    style: TextStyle(fontSize: 18),
+                  Expanded(child: Container(),),
+                  ElevatedButton.icon(
+                    onPressed: () => previousBills(context),
+                    icon: Icon(Icons.history, size: 20),
+                    label: Text('Previous Bills'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white, backgroundColor: Colors.purple,
+                    ),
                   ),
-                  Text(
-                    'Email: ${widget.email}',
-                    style: TextStyle(fontSize: 18),
+Expanded(child: Container(),),
+                  OutlinedButton.icon(
+                    onPressed: () => editUserData(context),
+                    icon: Icon(Icons.edit, size: 20),
+                    label: Text('Edit User Data'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.deepPurple, side: BorderSide(color: Colors.deepPurple), // Border color
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          previousBills(context);
-                        },
-                        icon: const Icon(Icons.more_horiz),
-                        label: const Text('Previous Bills'),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          editUserData(context);
-                        },
-                        icon: const Icon(Icons.edit),
-                        label: const Text('Edit User Data'),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          addUserData(context);
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text('Add New Data'),
-                      ),
-                    ],
+Expanded(child: Container(),),
+                  ElevatedButton.icon(
+                    onPressed: () => addUserData(context),
+                    icon: Icon(Icons.add, size: 20),
+                    label: Text('Add New Data'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white, backgroundColor: Colors.green,
+                    ),
                   ),
+                  Expanded(child: Container(),),
                 ],
               ),
-            ),
-          )),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
