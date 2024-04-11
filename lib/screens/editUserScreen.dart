@@ -115,7 +115,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                           onPressed: () {
                             if (update() == 'User updated') {
                               Navigator.pop(context);
-
+                              Navigator.pop(context, true);
                             }
                             else{
                               showAutoDismissDialog(context, "Error updating user");

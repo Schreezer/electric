@@ -160,3 +160,27 @@ Future updateUser(String id, String email, String houseNumber, String userType) 
   }
 }
 
+Future updateLastAddition(String id, DateTime date) async{
+
+  try{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? currentJwt = prefs.getString('jwt');
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/api/users/updateUser'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $currentJwt',
+      },
+      body: jsonEncode(<String, String>{
+        'id': id,
+        'lastAddition': date.toIso8601String(),
+      }),
+    );
+    Map<String, dynamic> responseData = jsonDecode(response.body);
+    return responseData;
+  }
+  catch(e){
+    throw e;
+  }
+
+}

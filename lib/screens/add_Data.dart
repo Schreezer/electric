@@ -77,6 +77,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
     );
   }
 
+
   Future addData(BuildContext contxt) async {
     try {
       // Add data to the database
@@ -101,7 +102,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
             'netPayable': int.tryParse(_netPayableController.text),
             'dateOfIssue': _issueDate.toLocal().toString().split(' ')[0],
           }));
-
+      
       if (value == "201") {
         return true;
       } else {
@@ -350,11 +351,15 @@ class _AddDataScreenState extends State<AddDataScreen> {
                   bool valu = await addData(context);
                   if (valu == true) {
                     print("Data added successfully");
-                    // show a snackbar saying that the data has been added successfull
+                    Map<String, dynamic> user = await getUserData(widget.userId);
+
+                    if (user['lastAddition'] == null || DateTime.parse(user['lastAddition']).isBefore(_issueDate)) {
+                      await updateLastAddition(widget.userId, _issueDate);
+                    }
 
                     showAutoDismissDialog(context, "Data added successfully");
                     Future.delayed(Duration(seconds: 2), () {
-                      Navigator.popAndPushNamed(context, "/admin");
+                      Navigator.pushReplacementNamed(context, '/admin');
                     });
                   }
 

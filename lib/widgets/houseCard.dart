@@ -23,9 +23,12 @@ class HouseCard extends StatefulWidget {
 }
 
 class _HouseCardState extends State<HouseCard> {
-  void addUserData(BuildContext context) {
-    Navigator.pushNamed(context, '/admin/addBill',
+  void addUserData(BuildContext context) async {
+    final result = await Navigator.pushNamed(context, '/admin/addBill',
         arguments: {'id': widget.userId, 'houseNumber': widget.houseNumber});
+    if (result == true) {
+      Navigator.pushReplacementNamed(context, '/admin');
+    }
   }
 
   void previousBills(BuildContext context) {
@@ -33,9 +36,12 @@ class _HouseCardState extends State<HouseCard> {
         arguments: {'id': widget.userId});
   }
 
-  void editUserData(BuildContext context) {
-    Navigator.pushNamed(context, '/admin/editUser',
+  void editUserData(BuildContext context) async{
+    final result = await Navigator.pushNamed(context, '/admin/editUser',
         arguments: {'id': widget.userId});
+    if (result == true){
+      Navigator.pushReplacementNamed(context, '/admin');
+    }
   }
 
   @override
