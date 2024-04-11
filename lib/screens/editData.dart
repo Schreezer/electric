@@ -7,7 +7,7 @@ import "package:electric/widgets/stflTextF.dart";
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        Future.delayed(Duration(seconds: 3), () {
+        Future.delayed(Duration(seconds: 2), () {
           Navigator.of(context).pop(true);
         });
         return AlertDialog(
@@ -103,13 +103,9 @@ class _EditScreenState extends State<EditScreen> {
             'dateOfIssue': _issueDate.toLocal().toString().split(' ')[0],
           });
 
-      String value = await updateUserData(widget.userId, data, widget.data['_id']);
-      if (value =='200'){
-        showAutoDismissDialog(contxt, 'Data Updated Successfully');
-      }
-      else{
-        showAutoDismissDialog(contxt, 'Data could not be updated');
-      }
+      updateUserData(widget.userId, data, widget.data['_id']).then((value) => showAutoDismissDialog(contxt, "Update Successful"));
+      return 'success';
+      
     }
     catch(e){
       showAutoDismissDialog(contxt, e.toString());
@@ -124,7 +120,7 @@ class _EditScreenState extends State<EditScreen> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context,true);
             },
           ),
         ),
@@ -258,8 +254,14 @@ class _EditScreenState extends State<EditScreen> {
               ),
         
               ElevatedButton(onPressed: ()async{
-                    await saveData(context);
-                    Navigator.pop(context);
+                    if( await saveData(context) == 'success'){
+                      print("success");
+                      Navigator.pop(context, true);
+                    }
+                    else{
+                      showAutoDismissDialog(context, "Error updating user");
+                    }
+
               }, child: Text('Save Data')),
             ],
           ),

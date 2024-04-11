@@ -103,6 +103,14 @@ class _MyAppState extends State<MyApp> {
               final userId = params['id'];
               return EditUserScreen(userId: userId);
             },
+            '/admin/bills/editBill': (context) {
+              final Map<String, dynamic> params = ModalRoute.of(context)!
+                  .settings
+                  .arguments as Map<String, dynamic>;
+              final data = params['data'];
+              final userId = params['userId'];
+              return EditScreen(data: data,userId: userId,);
+            },
             // 'admin/more': (context) => const TestScreen(),
             // '/profile': (context) => const ProfileScreen(),
           },

@@ -31,9 +31,12 @@ class _HouseCardState extends State<HouseCard> {
     }
   }
 
-  void previousBills(BuildContext context) {
-    Navigator.pushNamed(context, '/admin/bills',
+  void previousBills(BuildContext context) async{
+    final result = await Navigator.pushNamed(context, '/admin/bills',
         arguments: {'id': widget.userId});
+        if (result == true){
+          Navigator.pushReplacementNamed(context, '/admin');
+        }
   }
 
   void editUserData(BuildContext context) async{
@@ -49,7 +52,7 @@ class _HouseCardState extends State<HouseCard> {
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: Card(
-          elevation: 6, // Slightly stronger shadow
+          elevation: 6, 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
@@ -66,7 +69,7 @@ class _HouseCardState extends State<HouseCard> {
                   Expanded(child: Container()),
                   Text(
                     widget.lastAdded != null
-                        ? 'Last Added: ${widget.lastAdded}'
+                        ? 'Last Added: ${DateTime.parse(widget.lastAdded.toString()).toLocal().toString().split(' ')[0]}'
                         : 'No data',
                     style: const TextStyle(fontSize: 16),
                   )
@@ -88,24 +91,8 @@ class _HouseCardState extends State<HouseCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      // ElevatedButton(
-                      //     onPressed: () async {
-                      //       print(widget.userId);
-                      //       Map<String, dynamic> userData =
-                      //           await getUserData(widget.userId);
-                      //       print(userData);
-                      //     },
-                      //     child: Text('Test')),
                       ElevatedButton.icon(
                         onPressed: () {
-                          // On pressed route it to '/User/bills
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => DataScreen(),
-                          //     settings: RouteSettings(arguments: widget.userId),
-                          //   ),
-                          // );
                           previousBills(context);
                         },
                         icon: const Icon(Icons.more_horiz),

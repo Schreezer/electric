@@ -27,8 +27,7 @@ class _DataScreenState extends State<DataScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return Scaffold(
         
         appBar: AppBar(
           title: const Text('User Data'),
@@ -69,7 +68,7 @@ class _DataScreenState extends State<DataScreen> {
                   },
                 ),
         ),
-      ),
-    );
+      );
+    
   }
 }

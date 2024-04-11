@@ -16,8 +16,12 @@ class BillCardAdmin extends StatefulWidget {
 }
 
 class _BillCardAdminState extends State<BillCardAdmin> {
-  void edit(BuildContext context) {
-    Navigator.pushNamed(context, '/editData', arguments: {'data': widget.jsonData});
+  void edit(BuildContext context) async {
+    final result = await Navigator.pushNamed(context, '/admin/bills/editBill', arguments: {'data': widget.jsonData, 'userId': widget.userId});
+    if (result == true) {
+      print("result is true");
+      Navigator.pushReplacementNamed(context, '/admin/bills', arguments: {'id': widget.userId});
+    }
   }
 
   @override
@@ -71,8 +75,10 @@ class _BillCardAdminState extends State<BillCardAdmin> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onPressed: ()=> Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => EditScreen(data: widget.jsonData, userId: widget.userId,))),
+                  onPressed: ()=> 
+                  edit(context),
+                  // MaterialPageRoute(builder: (context) => EditScreen(data: widget.jsonData, userId: widget.userId,))),
+                  // Navigator.pushNamed(context, '/admin/bills/editBill', arguments: {'data': widget.jsonData , 'userId': widget.userId}),
                     child: Text('Edit', style: TextStyle(color: Colors.white)), // Corrected fontColor to color
                 ),
               ),
