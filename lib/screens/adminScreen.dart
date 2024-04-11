@@ -94,12 +94,13 @@ class _AdminScreenState extends State<AdminScreen> {
         label: Text(
           'Add User',
           style: TextStyle(
+            color: Colors.white,
             fontSize: 16,
           ),
         ),
         backgroundColor: Colors.blueAccent,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

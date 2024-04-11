@@ -33,7 +33,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
     
     try {
       updateUser(widget.userId, emailController.text, houseNumberController.text, userType).then((value) => 
-      showAutoDismissDialog(context, value['message']));
+      showAutoDismissDialog(context, "User Successfully Updated"));
       return 'User updated';
     } catch (e) {
       print('Error updating user: $e');
@@ -51,7 +51,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
     user.then((userData) {
       emailController.text = userData['email'];
       houseNumberController.text = userData['houseNumber'];
-      userType = userData['userType'];
+      userType = userData['userType'].toLowerCase() == 'admin' ? 'Admin' : 'Consumer';
     });
   }
 
@@ -115,8 +115,12 @@ class _EditUserScreenState extends State<EditUserScreen> {
                           onPressed: () {
                             if (update() == 'User updated') {
                               Navigator.pop(context);
+
                             }
-                            Navigator.pop(context);
+                            else{
+                              showAutoDismissDialog(context, "Error updating user");
+
+                            }
                           },
                           child: Text('Confirm'),
                         ),
