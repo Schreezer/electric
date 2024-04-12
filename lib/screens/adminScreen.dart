@@ -1,9 +1,9 @@
-import "dart:convert";
+import 'dart:convert';
 
-import "package:electric/widgets/houseCard.dart";
-import "package:flutter/material.dart";
-import "package:http/http.dart" as http;
-import "package:shared_preferences/shared_preferences.dart";
+import 'package:electric/widgets/houseCard.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminScreen extends StatefulWidget {
   AdminScreen({super.key});
@@ -14,8 +14,11 @@ class AdminScreen extends StatefulWidget {
 
 class _AdminScreenState extends State<AdminScreen> {
   List<dynamic> userData = [];
+  List<dynamic> filteredData = []; // To store the filtered data
   bool isLoading = true;
   String errorMessage = '';
+  TextEditingController searchController =
+      TextEditingController(); // For the search bar
 
   @override
   void initState() {
@@ -44,10 +47,13 @@ class _AdminScreenState extends State<AdminScreen> {
         List<dynamic> data = jsonDecode(response.body);
         setState(() {
           userData = data;
+          filteredData =
+              data; // Initially, filteredData is the same as the full userData list
         });
       } else {
         setState(() {
-          errorMessage = 'Failed to fetch user data. Status code: ${response.statusCode}';
+          errorMessage =
+              'Failed to fetch user data. Status code: ${response.statusCode}';
         });
       }
     } catch (e) {
@@ -61,21 +67,73 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
+  void filterSearchResults(String query) {
+    if (query.isNotEmpty) {
+      List<dynamic> dummyListData = [];
+      userData.forEach((item) {
+        if (item['houseNumber']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()) ||
+            item['email']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase())) {
+          dummyListData.add(item);
+        }
+      });
+      setState(() {
+        filteredData = dummyListData;
+      });
+      return;
+    } else {
+      setState(() {
+        filteredData = userData;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Data', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blueAccent,
-        elevation: 0,
+      titleSpacing: 0, // Ensures that the title takes only the needed space
+      title: Text('User Data', style: TextStyle(color: Colors.white)),
+      backgroundColor: Colors.blueAccent,
+      elevation: 0,
+      // Using PreferredSize widget to give a fixed size to the search bar
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight), // Standard toolbar height
+        child: Container(
+          color: Colors.white, // Container with white color to separate it from the AppBar
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+            child: TextField(
+              controller: searchController,
+              onChanged: (value) {
+                filterSearchResults(value);
+              },
+              decoration: InputDecoration(
+                labelText: "Search",
+                hintText: "Search by house number or email",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
+    ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : userData.isNotEmpty
+          : filteredData.isNotEmpty
               ? ListView.builder(
-                  itemCount: userData.length,
+                  itemCount: filteredData.length,
                   itemBuilder: (context, index) {
-                    Map<String, dynamic> user = userData[index];
+                    Map<String, dynamic> user = filteredData[index];
                     return HouseCard(
                       indexNumber: index,
                       houseNumber: user['houseNumber'],
@@ -85,7 +143,10 @@ class _AdminScreenState extends State<AdminScreen> {
                     );
                   },
                 )
-              : Center(child: Text(errorMessage.isNotEmpty ? errorMessage : 'No user data available')),
+              : Center(
+                  child: Text(errorMessage.isNotEmpty
+                      ? errorMessage
+                      : 'No user data available')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.pushNamed(context, '/admin/new');

@@ -34,6 +34,7 @@ dependencies:
   floating_bubbles: ^2.6.2
   flutter:
     sdk: flutter
+  flutter_svg: ^0.22.0
   fluttertoast: ^8.2.4
   google_fonts: ^6.2.1
   http: ^1.2.1
