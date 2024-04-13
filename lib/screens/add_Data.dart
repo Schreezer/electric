@@ -1,3 +1,7 @@
+
+import "dart:async";
+import "dart:core";
+
 import "package:electric/models/billData.dart";
 import "package:electric/models/user.dart";
 import "package:electric/resources/AuthMethods.dart";
@@ -62,6 +66,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
   TextEditingController _totalAmountController = TextEditingController();
   TextEditingController _netPayableController = TextEditingController();
   TextEditingController _dateOfIssueController = TextEditingController();
+  TextEditingController _energyChargesPerUnitController = TextEditingController();
 
   void showAutoDismissDialog(BuildContext context, String message) {
     showDialog(
@@ -77,12 +82,15 @@ class _AddDataScreenState extends State<AddDataScreen> {
     );
   }
 
-
   Future addData(BuildContext contxt) async {
     try {
       // Add data to the database
+      print("the total amount is as follows: ");
+      print( double.tryParse(_totalAmountController.text));
+
       String value = await addUserData(
           widget.userId,
+          
           BillData.fromJson({
             'consumerName': _consumerNameController.text,
             'houseNumber': _houseNumberController.text,
@@ -98,17 +106,18 @@ class _AddDataScreenState extends State<AddDataScreen> {
             'energyCharge': int.tryParse(_energyChargeController.text),
             'meterRent': int.tryParse(_meterRentController.text),
             'gst': int.tryParse(_gstController.text),
-            'totalAmount': int.tryParse(_totalAmountController.text),
+            'totalAmount': double.tryParse(_totalAmountController.text),
             'netPayable': int.tryParse(_netPayableController.text),
             'dateOfIssue': _issueDate.toLocal().toString().split(' ')[0],
           }));
-      
+
       if (value == "201") {
         return true;
       } else {
         return false;
       }
     } catch (e) {
+
       print("Error adding data: $e");
       // throw e;
       showSnackBar(contxt, e.toString());
@@ -180,6 +189,11 @@ class _AddDataScreenState extends State<AddDataScreen> {
                   setState(() {
                     _startDate = pickedDate;
                     selectedStart = true;
+                    if(_endDate != null){
+                      _numberOfDaysController.text =
+                          (_endDate.difference(_startDate).inDays + 1)
+                              .toString();
+                    }
                   });
                 }
               },
@@ -204,12 +218,18 @@ class _AddDataScreenState extends State<AddDataScreen> {
                   setState(() {
                     _endDate = pickedDate;
                     selectedEnd = true;
+                    if (_startDate != null) {
+                      _numberOfDaysController.text =
+                          (_endDate.difference(_startDate).inDays + 1)
+                              .toString();
+                    }
                   });
                 }
               },
               child: Text(selectedEnd
                   ? "${_endDate.toLocal().toString().split(' ')[0]}"
                   : 'Select End Date'),
+           
             ),
             // TextF(
             //   'End Date',
@@ -222,7 +242,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
             TextF(
               'Number of Days',
               _numberOfDaysController,
-              true,
+              false,
               keyboardType: TextInputType.number,
             ),
             SizedBox(
@@ -264,11 +284,29 @@ class _AddDataScreenState extends State<AddDataScreen> {
                 }
               },
             ),
+            SizedBox(height: 10),
+            TextF("Energy Charges Per Unit", _energyChargesPerUnitController, true,
+                keyboardType: TextInputType.number, onChanged: (value){
+                  if (_totalUnitsConsumedController.text.isNotEmpty) {
+                    setState(() {
+                      double energyCharge = double.parse(value) * totalConsumed;
+                      _energyChargeController.text = energyCharge.toString();
+                      if (_gstController.text.isNotEmpty && _meterRentController.text.isNotEmpty) {
+                        double totalAmount = energyCharge +
+                            double.parse(_meterRentController.text) +
+                            double.parse(_gstController.text);
+                        _totalAmountController.text = totalAmount.toString();
+                        double netPayable = totalAmount.roundToDouble();
+                        _netPayableController.text = netPayable.toString();
+                      }
+                    });
+                  }
+                }),
             SizedBox(
               height: 10,
             ),
             TextF(
-              'Total Units Consumed = ${totalConsumed}',
+              'Total Units Consumed',
               _totalUnitsConsumedController,
               false,
               keyboardType: TextInputType.number,
@@ -277,9 +315,9 @@ class _AddDataScreenState extends State<AddDataScreen> {
               height: 10,
             ),
             TextF(
-              'Energy Charge',
+              'Total Energy Charge',
               _energyChargeController,
-              true,
+              false,
               keyboardType: TextInputType.number,
             ),
             SizedBox(
@@ -295,10 +333,22 @@ class _AddDataScreenState extends State<AddDataScreen> {
               height: 10,
             ),
             TextF(
-              'GST',
+              'GST (%)',
               _gstController,
               true,
               keyboardType: TextInputType.number,
+              onChanged: (value) {
+                if (_energyChargeController.text.isNotEmpty) {
+                  setState(() {
+                    double totalAmount = double.parse(_energyChargeController.text) +
+                        double.parse(_meterRentController.text) +
+                        double.parse(value)*0.01*double.parse(_meterRentController.text);
+                    _totalAmountController.text = totalAmount.toString();
+                    double netPayable = totalAmount;
+                    _netPayableController.text = netPayable.round().toString();
+                  });
+                }
+              },
             ),
             SizedBox(
               height: 10,
@@ -306,7 +356,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
             TextF(
               'Total Amount',
               _totalAmountController,
-              true,
+              false,
               keyboardType: TextInputType.number,
             ),
             SizedBox(
@@ -315,7 +365,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
             TextF(
               'Net Payable',
               _netPayableController,
-              true,
+              false,
               keyboardType: TextInputType.number,
             ),
             SizedBox(
@@ -346,32 +396,57 @@ class _AddDataScreenState extends State<AddDataScreen> {
               height: 10,
             ),
             Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  bool valu = await addData(context);
-                  if (valu == true) {
-                    print("Data added successfully");
-                    Map<String, dynamic> user = await getUserData(widget.userId);
-
-                    if (user['lastAddition'] == null || DateTime.parse(user['lastAddition']).isBefore(_issueDate)) {
-                      await updateLastAddition(widget.userId, _issueDate);
+              child: Column(
+                children: [
+                  ElevatedButton(onPressed: (){
+                    if(_gstController.text.isNotEmpty && _meterRentController.text.isNotEmpty && _energyChargesPerUnitController.text.isNotEmpty && _currentReadingController.text.isNotEmpty && _previousReadingController.text.isNotEmpty){
+                      double energyCharge = double.parse(_energyChargesPerUnitController.text) * totalConsumed;
+                      _energyChargeController.text = energyCharge.toString();
+                      double totalAmount = energyCharge +
+                          double.parse(_meterRentController.text) +
+                          double.parse(_gstController.text)*0.01*double.parse(_meterRentController.text);
+                      setState(() {
+                        _totalAmountController.text = totalAmount.toString();
+                      double netPayable = totalAmount.roundToDouble();
+                      _netPayableController.text = netPayable.toString();
+                      });
+                      
                     }
-
-                    showAutoDismissDialog(context, "Data added successfully");
-                    Future.delayed(Duration(seconds: 2), () {
-                      Navigator.pushReplacementNamed(context, '/admin');
-                    });
-                  }
-
-                  // Add data to the database
-                },
-                style: ElevatedButton.styleFrom(
-                  // primary: Colors.blue, // Make the button more vibrant
-                  padding: EdgeInsets.symmetric(
-                      vertical: 15, horizontal: 30), // Make the button bigger
-                ),
-                child: const Text('Add Data',
-                    style: TextStyle(fontSize: 18)), // Increase font size
+                  }, child: Text("Re-Calculate All")),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      bool valu = await addData(context);
+                      if (valu == true) {
+                        print("Data added successfully");
+                        Map<String, dynamic> user =
+                            await getUserData(widget.userId);
+                  
+                        if (user['lastAddition'] == null ||
+                            DateTime.parse(user['lastAddition'])
+                                .isBefore(_issueDate)) {
+                          await updateLastAddition(widget.userId, _issueDate);
+                        }
+                  
+                        showAutoDismissDialog(context, "Data added successfully");
+                        Future.delayed(Duration(seconds: 2), () {
+                          Navigator.pushReplacementNamed(context, '/admin');
+                        });
+                      }
+                  
+                      // Add data to the database
+                    },
+                    style: ElevatedButton.styleFrom(
+                      // primary: Colors.blue, // Make the button more vibrant
+                      padding: EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 30), // Make the button bigger
+                    ),
+                    child: const Text('Add Data',
+                        style: TextStyle(fontSize: 18)), // Increase font size
+                  ),
+                ],
               ),
             ),
             SizedBox(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:electric/screens/editData.dart';
-
+import 'package:intl/intl.dart';
 class BillCardAdmin extends StatefulWidget {
   final Map<String, dynamic> jsonData;
   final String userId;
@@ -46,10 +46,17 @@ class _BillCardAdminState extends State<BillCardAdmin> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Date of Issue: ${widget.jsonData['dateOfIssue']}',
+              
+                
+
+                // ...
+
+                Text(
+                  'Date of Issue: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.jsonData['dateOfIssue']))}',
+
+                
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Enhanced style
-              ),
+                ),
               SizedBox(height: 8),
               Text(
                 'Consumer Name: ${widget.jsonData['consumerName']}',

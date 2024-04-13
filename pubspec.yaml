@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   animated_text_kit: ^4.2.2
+  async: ^2.11.0
   cupertino_icons: ^1.0.6
   fl_chart: ^0.66.2
   floating_bubbles: ^2.6.2

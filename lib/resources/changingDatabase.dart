@@ -1,6 +1,9 @@
 
 
 import 'dart:convert';
+import 'dart:core';
+import 'dart:core';
+
 
 import 'package:electric/models/billData.dart';
 import 'package:electric/widgets/snackBar.dart';
@@ -8,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 
-Future<Map<String, dynamic>> createUser(String email, String houseNumber, String userType) async {
+Future <Map<String, dynamic>> createUser(String email, String houseNumber, String userType) async {
   try {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? currentJwt = prefs.getString('jwt');
@@ -60,6 +63,8 @@ Future<Map<String, dynamic>> getUserData(String id) async {
     throw e;
   }
 }
+
+
 
 Future addUserData(String id, BillData data) async {
 

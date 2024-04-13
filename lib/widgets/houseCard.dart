@@ -32,26 +32,32 @@ class _HouseCardState extends State<HouseCard> {
     }
   }
 
-  void previousBills(BuildContext context) async{
+  void previousBills(BuildContext context) async {
     final result = await Navigator.pushNamed(context, '/admin/bills',
         arguments: {'id': widget.userId});
-        if (result == true){
-          Navigator.pushReplacementNamed(context, '/admin');
-        }
-  }
-
-  void editUserData(BuildContext context) async{
-    final result = await Navigator.pushNamed(context, '/admin/editUser',
-        arguments: {'id': widget.userId});
-    if (result == true){
+    if (result == true) {
       Navigator.pushReplacementNamed(context, '/admin');
     }
   }
 
+  void editUserData(BuildContext context) async {
+    final result = await Navigator.pushNamed(context, '/admin/editUser',
+        arguments: {'id': widget.userId});
+    if (result == true) {
+      Navigator.pushReplacementNamed(context, '/admin');
+    }
+  }
+
+  // String formatDate(String? date) {
+  //   if (date == null) return 'No data';
+  //   final dateTime = DateTime.parse(date);
+  //   return DateFormat('MMM dd, yyyy').format(dateTime);
+  // }
   String formatDate(String? date) {
     if (date == null) return 'No data';
-    final dateTime = DateTime.parse(date);
-    return DateFormat('MMM dd, yyyy').format(dateTime);
+    final dateTime = DateTime.parse(date).toLocal(); // Convert to local time
+    final indianDateFormat = DateFormat('MMM dd, yyyy').format(dateTime);
+    return indianDateFormat;
   }
 
   @override
@@ -73,27 +79,37 @@ class _HouseCardState extends State<HouseCard> {
                   Text(
                     'House Number: ${widget.houseNumber}',
                     style: TextStyle(
-                      fontSize: 22, 
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.deepPurple, // Adjust to your color theme
                     ),
                   ),
-                  Expanded(child: Container(),),
+                  Expanded(
+                    child: Container(),
+                  ),
                   Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple[100], // Light purple background
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  child: Text(
-                    widget.lastAdded != null ? 'Last Added: ${formatDate(widget.lastAdded)}' : 'No data',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontStyle: FontStyle.italic,
-                      color: Colors.deepPurple, // Text color
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8.0, vertical: 4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.deepPurple[100], // Light purple background
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
+
+                    // ...
+
+                    child: Text(
+                      widget.lastAdded != null
+                          ? 'Last Added: ${formatDate(widget.lastAdded)}'
+                          : 'No data',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.deepPurple, // Text color
+                      ),
+                    ),
+
+                    // ...
                   ),
-                ),
                 ],
               ),
               const SizedBox(height: 6),
@@ -118,36 +134,47 @@ class _HouseCardState extends State<HouseCard> {
               ),
               const SizedBox(height: 16),
               Row(
-
                 children: [
-                  Expanded(child: Container(),),
+                  Expanded(
+                    child: Container(),
+                  ),
                   ElevatedButton.icon(
                     onPressed: () => previousBills(context),
                     icon: Icon(Icons.history, size: 20),
                     label: Text('Previous Bills'),
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.purple,
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.purple,
                     ),
                   ),
-Expanded(child: Container(),),
+                  Expanded(
+                    child: Container(),
+                  ),
                   OutlinedButton.icon(
                     onPressed: () => editUserData(context),
                     icon: Icon(Icons.edit, size: 20),
                     label: Text('Edit User Data'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.deepPurple, side: BorderSide(color: Colors.deepPurple), // Border color
+                      foregroundColor: Colors.deepPurple,
+                      side:
+                          BorderSide(color: Colors.deepPurple), // Border color
                     ),
                   ),
-Expanded(child: Container(),),
+                  Expanded(
+                    child: Container(),
+                  ),
                   ElevatedButton.icon(
                     onPressed: () => addUserData(context),
                     icon: Icon(Icons.add, size: 20),
                     label: Text('Add New Data'),
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.green,
                     ),
                   ),
-                  Expanded(child: Container(),),
+                  Expanded(
+                    child: Container(),
+                  ),
                 ],
               ),
             ],
