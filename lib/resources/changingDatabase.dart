@@ -40,6 +40,7 @@ Future <Map<String, dynamic>> createUser(String email, String houseNumber, Strin
 // a function to retrieve a particular user's data based on their id
 Future<Map<String, dynamic>> getUserData(String id) async {
   try {
+    print(" ia m geaswe");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? currentJwt = prefs.getString('jwt');
     

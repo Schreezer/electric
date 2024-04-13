@@ -1,4 +1,7 @@
+import 'package:electric/models/billData.dart';
+import 'package:electric/resources/changingDatabase.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -8,58 +11,74 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<BillData> bills = [];
+  BillData? selectedBill;
 
-  
-  late String _selectedMonth;
-  late String _selectedYear;
-
-  final List<String> _months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
-
-  final List<String> _years = [
-    '2022', '2023', '2024', '2025' // Add more years if needed
-  ];
-
-  final String _houseNumber = '999'; // Example house number
-  final String _consumerName = 'CONGMEN 224'; // Example consumer name
-
-  final double _previousReading = 60.00;
-  final double _currentReading = 100.00;
-
-  final double _perUnitCharge = 5.50;
-  final double _totalEnergyCharge = 220.00;
-  final double _meterRent = 50.00;
-  final double _gstPercentage = 18.00; // Represented as a percentage
-  final double _totalAmount = 270.00;
+  Future<void> getBills() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? id = prefs.getString('id');
+    print("the id is :");
+    print(id);
+    var fetchedBills = await getUserData(id!);
+    List<BillData> loadedBills = [];
+    for (var bill in fetchedBills['data']) {
+      loadedBills.add(BillData.fromJson(bill));
+    }
+    setState(() {
+      bills = loadedBills;
+      selectedBill = bills.isNotEmpty ? bills[0] : null;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    _selectedMonth = _months[DateTime.now().month - 1];
-    _selectedYear = DateTime.now().year.toString();
+    getBills();
   }
 
   @override
   Widget build(BuildContext context) {
-    double netReading = _currentReading - _previousReading;
-    double gstAmount = _meterRent * (_gstPercentage / 100);
-    double total = _totalEnergyCharge + gstAmount;
-    double totalAmountPayable = total.roundToDouble();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Confirm Logout'),
+                    content: Text('Are you sure you want to logout?'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () async {
+                          // Add logout functionality here
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          prefs.remove('jwt');
+                          prefs.remove('userType');
+                          prefs.remove('id');
+                          prefs.remove('email');
+                          print("the token si :");
+                          print(prefs.getString('token'));
+                          Navigator.pushNamed(context, '/login');
+                        },
+                        child: Text('Logout'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ],
         backgroundColor: Colors.teal,
       ),
       body: SafeArea(
@@ -68,43 +87,95 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               const SizedBox(height: 8),
-              _buildHeaderSection(context),
+              _buildHeaderSection(),
               const SizedBox(height: 24),
               _buildInformationCard(
                 title: 'HOUSE NUMBER',
-                value: _houseNumber,
+                value: selectedBill?.houseNumber ?? '',
                 iconData: Icons.home,
                 color: Colors.blue,
               ),
               const SizedBox(height: 16),
               _buildInformationCard(
                 title: 'CONSUMER NAME',
-                value: _consumerName,
+                value: selectedBill?.consumerName ?? '',
                 iconData: Icons.person,
                 color: Colors.teal,
               ),
               const SizedBox(height: 16),
               ReadingSection(
-                previousReading: _previousReading,
-                currentReading: _currentReading,
-                netReading: netReading,
+                previousReading: selectedBill?.previousReading.toDouble() ?? 0,
+                currentReading: selectedBill?.currentReading.toDouble() ?? 0,
+                netReading: selectedBill?.totalUnitsConsumed.toDouble() ?? 0,
+                context: context,
               ),
               const SizedBox(height: 16),
               billSummarySection(
-                perUnitCharge: _perUnitCharge,
-                totalEnergyCharge: _totalEnergyCharge,
-                meterRent: _meterRent,
-                gstPercentage: _gstPercentage,
-                totalAmount: _totalAmount,
-                totalAmountPayable: totalAmountPayable,
+                perUnitCharge: selectedBill!.energyCharge.toDouble() / selectedBill!.totalUnitsConsumed.toDouble() ?? 0,
+                totalEnergyCharge: selectedBill?.energyCharge.toDouble() ?? 0,
+                meterRent: selectedBill?.meterRent.toDouble() ?? 0,
+                gstPercentage: selectedBill?.gst.toDouble() ?? 0,
+                totalAmount: selectedBill?.totalAmount ?? 0,
+                totalAmountPayable: selectedBill?.netPayable.toDouble() ?? 0,
               ),
               const SizedBox(height: 30),
-              settingsButton(), // Added method for settings button
-              const SizedBox(height: 40), // Additional space at the bottom
+
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeaderSection() {
+    return DropdownButton<BillData>(
+      value: selectedBill,
+      onChanged: (BillData? newValue) {
+        setState(() {
+          selectedBill = newValue!;
+        });
+      },
+      items: bills.map<DropdownMenuItem<BillData>>((BillData bill) {
+        return DropdownMenuItem<BillData>(
+          value: bill,
+          child: Text("${bill.dateOfIssue}"),
+        );
+      }).toList(),
+      underline: Container(height: 2, color: Colors.teal),
+    );
+  }
+
+  Widget _buildBillDetails(BillData bill) {
+    return Column(
+      children: [
+        _buildInformationCard(
+          title: 'HOUSE NUMBER',
+          value: bill.houseNumber,
+          iconData: Icons.home,
+          color: Colors.blue,
+        ),
+        const SizedBox(height: 16),
+        _buildInformationCard(
+          title: 'CONSUMER NAME',
+          value: bill.consumerName,
+          iconData: Icons.person,
+          color: Colors.teal,
+        ),
+        const SizedBox(height: 16),
+        _buildInformationCard(
+          title: 'METER NUMBER',
+          value: bill.meterNumber.toString(),
+          iconData: Icons.numbers,
+          color: Colors.green,
+        ),
+        const SizedBox(height: 16),
+        _buildInformationCard(
+          title: 'NET PAYABLE',
+          value: '\$${bill.netPayable.toStringAsFixed(2)}',
+          iconData: Icons.money_off,
+          color: Colors.red,
+        ),
+      ],
     );
   }
 
@@ -126,44 +197,71 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
-  Widget _buildHeaderSection(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _buildMonthYearDropdown(_selectedMonth, _months, (String? newValue) {
-          setState(() {
-            _selectedMonth = newValue!;
-          });
-        }),
-        _buildMonthYearDropdown(_selectedYear, _years, (String? newValue) {
-          setState(() {
-            _selectedYear = newValue!;
-          });
-        }),
-      ],
+  Widget billSummarySection({
+    required double perUnitCharge,
+    required double totalEnergyCharge,
+    required double meterRent,
+    required double gstPercentage,
+    required double totalAmount,
+    required double totalAmountPayable,
+  }) {
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.only(top: 20),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildBillRow('Per Unit Charge', '$perUnitCharge per kWh'),
+            buildBillRow('Total Energy Charge', '$totalEnergyCharge kWh'),
+            buildBillRow('Meter Rent', '$meterRent'),
+            buildBillRow('GST ($gstPercentage%)',
+                '${(gstPercentage / 100) * meterRent}'),
+            const Divider(),
+            buildBillRow('Total Amount', '$totalAmount', isTotal: true),
+            const Divider(),
+            buildBillRow('Total Amount Payable', '$totalAmountPayable',
+                isTotal: true),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildMonthYearDropdown(String selectedValue, List<String> items,
-      ValueChanged<String?> onChanged) {
-    return DropdownButton<String>(
-      value: selectedValue,
-      onChanged: onChanged,
-      items: items.map<DropdownMenuItem<String>>((String value) {
-        return DropdownMenuItem<String>(
-          value: value,
-          child: Text(value),
-        );
-      }).toList(),
-      underline: Container(height: 2, color: Colors.teal),
+    Widget buildBillRow(String title, String value, {bool isTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: isTotal ? Colors.teal : null,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
+              color: isTotal ? Colors.teal : null,
+            ),
+          ),
+        ],
+      ),
     );
   }
+
 
   Widget ReadingSection({
     required double previousReading,
     required double currentReading,
     required double netReading,
+    required BuildContext context,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
@@ -241,71 +339,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget billSummarySection({
-    required double perUnitCharge,
-    required double totalEnergyCharge,
-    required double meterRent,
-    required double gstPercentage,
-    required double totalAmount,
-    required double totalAmountPayable,
-  }) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.only(top: 20),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildBillRow('Per Unit Charge', '$perUnitCharge per kWh'),
-            buildBillRow('Total Energy Charge', '$totalEnergyCharge kWh'),
-            buildBillRow('Meter Rent', '$meterRent'),
-            buildBillRow('GST ($gstPercentage%)',
-                '${(gstPercentage / 100) * meterRent}'),
-            const Divider(),
-            buildBillRow('Total Amount', '$totalAmount', isTotal: true),
-            const Divider(),
-            buildBillRow('Total Amount Payable', '$totalAmountPayable',
-                isTotal: true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildBillRow(String title, String value, {bool isTotal = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? Colors.teal : null,
-            ),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? Colors.teal : null,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget settingsButton() {
-    return FloatingActionButton.extended(
-      onPressed: () {
-        // Add functionality for settings button
-      },
-      icon: const Icon(Icons.settings),
-      label: const Text('Settings'),
-      backgroundColor: Colors.teal,
-    );
-  }
-}

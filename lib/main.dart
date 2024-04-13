@@ -21,7 +21,7 @@ void main() async {
   String? token = prefs.getString('jwt');
   String? userType = prefs.getString('userType');
   String initialRoute =
-      token != null && !JwtDecoder.isExpired(token) ? '/home' : '/';
+      token != null && !JwtDecoder.isExpired(token) ? '/home' : '/login';
   initialRoute = userType == 'admin' ? '/choice' : initialRoute;
   print("the initial route is : ");
   print(initialRoute);
@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
           ),
           initialRoute: widget.initialRoute,
           routes: {
-            '/': (context) => const EntryPoint(),
+            // '/': (context) => const EntryPoint(),
             '/login': (context) => const LoginScreen(),
             '/choice': (context) => const ChoiceScreen(),
             '/home': (context) => const HomeScreen(),
