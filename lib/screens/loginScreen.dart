@@ -197,8 +197,8 @@ bool emailValid() {
                                 showSnackBar(context,
                                     "OTP sent to ${_emailController.text}");
                               } else {
-                                showSnackBar(context,
-                                    "Please enter a valid email address");
+                                // showSnackBar(context,
+                                //     "$otpResult");
                               }
                             } else {
                               showSnackBar(context,

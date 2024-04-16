@@ -67,7 +67,7 @@ class AuthMethods {
 
       return "code sent";
     } else {
-      return 'Failed to request OTP';
+      return jsonDecode(response.body)['message'];
     }
   }
 

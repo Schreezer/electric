@@ -49,10 +49,6 @@ class _DataScreenState extends State<DataScreen> {
         body: Center(
           child: userData == null
               ? Text('No data', style: TextStyle(fontSize: 20))
-              // : Text(
-              //     'Data length: ${userData['data'].length}',
-              //     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              // )DateTime.parse
               : ListView.builder(
                   itemCount: userData['data'].length,
                   itemBuilder: (context, index) {

@@ -17,10 +17,16 @@ class _AdminScreenState extends State<AdminScreen> {
   bool isLoading = true;
   String errorMessage = '';
 
+
+  List<dynamic> filteredData = []; // To store the filtered data
+  TextEditingController searchController =
+      TextEditingController(); // For the search bar
+
   @override
   void initState() {
     super.initState();
     fetchUserData();
+    
   }
 
   Future<void> fetchUserData() async {
@@ -44,6 +50,7 @@ class _AdminScreenState extends State<AdminScreen> {
         List<dynamic> data = jsonDecode(response.body);
         setState(() {
           userData = data;
+          filteredData = data;
         });
       } else {
         setState(() {
@@ -61,6 +68,32 @@ class _AdminScreenState extends State<AdminScreen> {
     }
   }
 
+  void filterSearchResults(String query) {
+    if (query.isNotEmpty) {
+      List<dynamic> dummyListData = [];
+      userData.forEach((item) {
+        if (item['houseNumber']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase()) ||
+            item['email']
+                .toString()
+                .toLowerCase()
+                .contains(query.toLowerCase())) {
+          dummyListData.add(item);
+        }
+      });
+      setState(() {
+        filteredData = dummyListData;
+      });
+      return;
+    } else {
+      setState(() {
+        filteredData = userData;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,14 +101,40 @@ class _AdminScreenState extends State<AdminScreen> {
         title: Text('User Data', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         elevation: 0,
+        bottom: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight), // Standard toolbar height
+        child: Container(
+          color: Colors.white, // Container with white color to separate it from the AppBar
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+            child: TextField(
+              controller: searchController,
+              onChanged: (value) {
+                filterSearchResults(value);
+              },
+              decoration: InputDecoration(
+                labelText: "Search",
+                hintText: "Search by house number or email",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(25.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
+    ),
+      
+      
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : userData.isNotEmpty
+          : filteredData.isNotEmpty
               ? ListView.builder(
-                  itemCount: userData.length,
+                  itemCount: filteredData.length,
                   itemBuilder: (context, index) {
-                    Map<String, dynamic> user = userData[index];
+                    Map<String, dynamic> user = filteredData[index];
                     return HouseCard(
                       indexNumber: index,
                       houseNumber: user['houseNumber'],
