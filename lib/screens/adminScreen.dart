@@ -1,5 +1,6 @@
 import "dart:convert";
 
+import "package:electric/resources/changingDatabase.dart";
 import "package:electric/widgets/houseCard.dart";
 import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
@@ -16,6 +17,9 @@ class _AdminScreenState extends State<AdminScreen> {
   List<dynamic> userData = [];
   bool isLoading = true;
   String errorMessage = '';
+  double? meterRent;
+  double? unitRate;
+  double? gst ;
 
 
   List<dynamic> filteredData = []; // To store the filtered data
@@ -27,6 +31,16 @@ class _AdminScreenState extends State<AdminScreen> {
     super.initState();
     fetchUserData();
     
+  }
+
+  Future <void> fetchConstants() async{
+    Map<String, dynamic> constants = await fetchDefaultValues();
+    setState(() {
+      meterRent = constants['meterRent'];
+      unitRate = constants['unitRate'];
+      gst = constants['gst'];
+    });
+
   }
 
   Future<void> fetchUserData() async {
@@ -131,19 +145,33 @@ class _AdminScreenState extends State<AdminScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : filteredData.isNotEmpty
-              ? ListView.builder(
-                  itemCount: filteredData.length,
-                  itemBuilder: (context, index) {
-                    Map<String, dynamic> user = filteredData[index];
-                    return HouseCard(
-                      indexNumber: index,
-                      houseNumber: user['houseNumber'],
-                      email: user['email'],
-                      userId: user['_id'],
-                      lastAdded: user['lastAddition'],
-                    );
-                  },
-                )
+              ? Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Meter Rent: ${meterRent.toString()}'),
+                        Text('Unit Rate: ${unitRate.toString()}'),
+                        Text('GST: ${gst.toString()}'),
+                      ],
+                    ),
+                  )
+                  ,ListView.builder(
+                    itemCount: filteredData.length,
+                    itemBuilder: (context, index) {
+                      Map<String, dynamic> user = filteredData[index];
+                      return HouseCard(
+                        indexNumber: index,
+                        houseNumber: user['houseNumber'],
+                        email: user['email'],
+                        userId: user['_id'],
+                        lastAdded: user['lastAddition'],
+                      );
+                    },
+                  ),]
+              )
               : Center(child: Text(errorMessage.isNotEmpty ? errorMessage : 'No user data available')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

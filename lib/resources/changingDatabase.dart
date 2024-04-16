@@ -190,3 +190,47 @@ Future updateLastAddition(String id, DateTime date) async{
   }
 
 }
+
+Future fetchDefaultValues() async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? currentJwt = prefs.getString('jwt');
+    
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/api/users/getConstants'),
+      headers: {
+        'Authorization': 'Bearer $currentJwt',
+      },
+    );
+    
+    Map<String, dynamic> responseData = jsonDecode(response.body);
+    return responseData;
+  } catch (e) {
+    print("Error fetching default values: $e");
+    throw e;
+  }
+}
+Future addConstants(String key, String value) async{
+  try{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+     String? currentJwt = prefs.getString('jwt');
+
+     final response = await http.post(
+       Uri.parse('http://localhost:3000/api/users/addConstants'),
+       headers: {
+         'Content-Type': 'application/json; charset=UTF-8',
+         'Authorization: Bearer': '$currentJwt',
+        },
+        body: jsonEncode(<String, String>{
+          'key': key,
+          'value': value,
+        }),
+      );
+      Map<String, dynamic> responseData = jsonDecode(response.body);
+      return responseData;
+
+  }catch (e){
+    print("Error adding Constants: $e");
+    throw e;
+  }
+}
