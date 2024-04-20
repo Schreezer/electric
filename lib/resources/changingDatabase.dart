@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 
-Future <Map<String, dynamic>> createUser(String email, String houseNumber, String userType) async {
+Future createUser(String email, String houseNumber, String userType, String? userName, String? consumerType, String? meterNumber) async {
   try {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? currentJwt = prefs.getString('jwt');
@@ -22,15 +22,22 @@ Future <Map<String, dynamic>> createUser(String email, String houseNumber, Strin
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $currentJwt',
       },
+
       body: jsonEncode(<String, String>{
+        'userName': userName ?? '',
         'email': email,
         'houseNumber': houseNumber,
         'userType': userType,
+        'consumerType': consumerType ?? '',
+        'meterNumber': meterNumber ?? '',
       }),
     );
-    
-    Map<String, dynamic> responseData = jsonDecode(response.body);
-    return responseData;
+    print(response.statusCode);
+    // Map<String, dynamic> responseData = jsonDecode(response);
+    // print("the response data is as follows: ");
+    print(response);
+
+    return response.statusCode.toString();
   } catch (e) {
     print("Error creating user: $e");
     throw e;
@@ -56,7 +63,8 @@ Future<Map<String, dynamic>> getUserData(String id) async {
     );
     
     Map<String, dynamic> responseData = jsonDecode(response.body);
-    print("the response data is as follows: ");
+    
+    print("the user's data is as follows: ");
     print(responseData);
     return responseData;
   } catch (e) {
@@ -139,7 +147,7 @@ Future updateUserData(String userId, BillData data, String billId) async {
   }
 }
 
-Future updateUser(String id, String email, String houseNumber, String userType) async {
+Future updateUser(String id, String email, String houseNumber, String userType, String userName, String consumerType, String? meterNumber) async {
   try {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? currentJwt = prefs.getString('jwt');
@@ -155,6 +163,9 @@ Future updateUser(String id, String email, String houseNumber, String userType) 
         'email': email,
         'houseNumber': houseNumber,
         'userType': userType,
+        'userName': userName,
+        'consumerType': consumerType,
+        'meterNumber': meterNumber ?? '',
       }),
     );
     
@@ -199,11 +210,14 @@ Future fetchDefaultValues() async {
     final response = await http.post(
       Uri.parse('http://localhost:3000/api/users/getConstants'),
       headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $currentJwt',
       },
     );
     
-    Map<String, dynamic> responseData = jsonDecode(response.body);
+    List<dynamic> responseData = jsonDecode(response.body);
+    print("the response data is as follows: ");
+    print(responseData);
     return responseData;
   } catch (e) {
     print("Error fetching default values: $e");
@@ -211,26 +225,60 @@ Future fetchDefaultValues() async {
   }
 }
 Future addConstants(String key, String value) async{
+  print("addition of constants called");
   try{
     SharedPreferences prefs = await SharedPreferences.getInstance();
      String? currentJwt = prefs.getString('jwt');
 
      final response = await http.post(
-       Uri.parse('http://localhost:3000/api/users/addConstants'),
+       Uri.parse('http://localhost:3000/api/users/createConstant'),
        headers: {
          'Content-Type': 'application/json; charset=UTF-8',
-         'Authorization: Bearer': '$currentJwt',
+         'Authorization': 'Bearer $currentJwt',
         },
         body: jsonEncode(<String, String>{
           'key': key,
           'value': value,
         }),
       );
+      print(jsonDecode(response.statusCode.toString()));
+      print(jsonDecode(response.body));
       Map<String, dynamic> responseData = jsonDecode(response.body);
       return responseData;
 
   }catch (e){
     print("Error adding Constants: $e");
+    throw e;
+  }
+}
+
+Future updateConstant(String key, String value) async{
+  try{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? currentJwt = prefs.getString('jwt');
+    print(" the constant is ");
+    print(key);
+
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/api/users/updateConstant'),
+      headers: {
+         'Content-Type': 'application/json; charset=UTF-8',
+         'Authorization': 'Bearer $currentJwt',
+        },
+      body: jsonEncode(<String, String>{
+        'key': key,
+        'value': value,
+      }),
+    );
+    print(jsonDecode(response.statusCode.toString()));
+
+    Map<String, dynamic> responseData = jsonDecode(response.body);
+    print("the response data is as follows: ");
+    print(responseData);
+    return responseData;
+
+  }catch (e){
+    print("Error updating Constants: $e");
     throw e;
   }
 }

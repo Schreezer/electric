@@ -2,7 +2,9 @@ import "package:electric/models/billData.dart";
 import "package:flutter/material.dart";
 
 class User {
+  String? userName;
   String email;
+  String? consumerType;
   String? houseNumber;
   String userType;
   List<BillData>? data;
@@ -11,6 +13,7 @@ class User {
   String id;
 
   User({
+    this.userName,
     required this.id,
     required this.email,
     this.houseNumber,
@@ -18,6 +21,7 @@ class User {
     this.data,
     this.otp,
     this.otpExpiry,
+    this.consumerType,
   });
 
   // void addBillData(BillData newBillData) {

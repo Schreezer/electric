@@ -12,6 +12,9 @@ class AddUserScreen extends StatefulWidget {
 class _AddUserScreenState extends State<AddUserScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController houseNumberController = TextEditingController();
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController consumerTypeController = TextEditingController();
+  final TextEditingController meterNumberController = TextEditingController();
   String userType = 'Consumer';
 
   @override
@@ -25,12 +28,51 @@ class _AddUserScreenState extends State<AddUserScreen> {
         child: Column(
           children: [
             TextField(
+              controller: userNameController,
+              decoration: InputDecoration(labelText: 'User Name'),
+            ),
+            TextField(
               controller: emailController,
               decoration: InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: houseNumberController,
               decoration: InputDecoration(labelText: 'House Number'),
+            ),
+            TextField(
+              controller: meterNumberController,
+              decoration: InputDecoration(labelText: 'Meter Number'),
+            ),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelText: 'Type',
+              ),
+              value: consumerTypeController.text.isNotEmpty ? consumerTypeController.text : null,
+              items: [
+                DropdownMenuItem<String>(
+                  value: 'Domestic',
+                  child: Text('Domestic'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'ShopKeeper',
+                  child: Text('ShopKeeper'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'Director',
+                  child: Text('Director'),
+                ),
+                DropdownMenuItem(child: Text("1"), value: "1"),
+                DropdownMenuItem(child: Text("2"), value: "2"),
+                DropdownMenuItem(child: Text("3"), value: "3"),
+                DropdownMenuItem(child: Text("4"), value: "4"),
+                DropdownMenuItem(child: Text("5"), value: "5"),
+                DropdownMenuItem(child: Text("6"), value: "6"),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  consumerTypeController.text = value!;
+                });
+              },
             ),
             DropdownButton<String>(
               value: userType,
@@ -58,8 +100,10 @@ class _AddUserScreenState extends State<AddUserScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('Are you sure you want to create the following user?'),
+                              Text('User Name: ${userNameController.text}'),
                               Text('Email: ${emailController.text}'),
                               Text('House Number: ${houseNumberController.text}'),
+                              Text('Consumer Type: ${consumerTypeController.text}'),
                               Text('User Type: $userType'),
                             ],
                           ),
@@ -76,14 +120,24 @@ class _AddUserScreenState extends State<AddUserScreen> {
                               emailController.text,
                               houseNumberController.text,
                               userType.toLowerCase(),
+                              userNameController.text,
+                              consumerTypeController.text,
+                              meterNumberController.text.toString(),
                             ).then((responseData) {
-                              if (responseData['status'] == 'success') {
+                              if (responseData == '201') {
                                 showSnackBar(
                                     context, "User created successfully!");
                                 Navigator.pushNamed(context, '/home');
                               }
+                              else if (responseData == '400') {
+                                showSnackBar(context, "Some error occured");
+                              }
+                              else {
+                                showSnackBar(context, "Error creating user! $responseData");
+                              }
                             }).catchError((error) {
                               // Handle error
+                              showSnackBar(context, error.toString());
                             });
                             Navigator.of(context).pop();
                           },

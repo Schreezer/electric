@@ -109,7 +109,7 @@ bool emailValid() {
       await prefs.setString('userType', responseData['userType']);
       await Provider.refreshUser(false);
       // get the string jwt stored and print it to check:
-    Navigator.pushNamed(context, responseData['userType']=='admin'?'/choice':'/home');
+    Navigator.pushNamed(context, responseData['userType'].toLowerCase=='admin'?'/choice':'/home');
     } catch (e) {
       showSnackBar(context, e.toString());
     }

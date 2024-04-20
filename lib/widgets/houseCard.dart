@@ -6,16 +6,22 @@ import 'package:intl/intl.dart';
 class HouseCard extends StatefulWidget {
   final int indexNumber;
   final String houseNumber;
+  final String? consumerType;
   final String email;
   final String userId;
   final String? lastAdded;
+  final String? userName;
+  final String? meterNumber;
 
   const HouseCard({
     Key? key,
+    this.meterNumber,
     required this.indexNumber,
+    this.consumerType,
     required this.houseNumber,
     required this.email,
     required this.userId,
+    this.userName,
     this.lastAdded,
   }) : super(key: key);
 
@@ -25,8 +31,14 @@ class HouseCard extends StatefulWidget {
 
 class _HouseCardState extends State<HouseCard> {
   void addUserData(BuildContext context) async {
-    final result = await Navigator.pushNamed(context, '/admin/addBill',
-        arguments: {'id': widget.userId, 'houseNumber': widget.houseNumber});
+    final result =
+        await Navigator.pushNamed(context, '/admin/addBill', arguments: {
+      'id': widget.userId,
+      'houseNumber': widget.houseNumber,
+      'userName': widget.userName ?? '',
+      'consumerType': widget.consumerType ?? '',
+      'meterNumber': widget.meterNumber ?? '',
+    });
     if (result == true) {
       Navigator.pushReplacementNamed(context, '/admin');
     }

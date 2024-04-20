@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String? id = prefs.getString('id');
     print("the id is :");
     print(id);
-    var fetchedBills = await getUserData(id!);
+    var fetchedBills = await getUserData(id!) ;
     List<BillData> loadedBills = [];
     for (var bill in fetchedBills['data']) {
       loadedBills.add(BillData.fromJson(bill));

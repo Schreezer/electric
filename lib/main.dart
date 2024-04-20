@@ -19,10 +19,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('jwt');
-  String? userType = prefs.getString('userType');
+  String? userType = prefs.getString('userType')?.toLowerCase();
   String initialRoute =
       token != null && !JwtDecoder.isExpired(token) ? '/home' : '/login';
-  initialRoute = userType == 'admin' ? '/choice' : initialRoute;
+  initialRoute = userType== 'admin' ? '/choice' : initialRoute;
   print("the initial route is : ");
   print(initialRoute);
   print(token);
@@ -86,7 +86,10 @@ class _MyAppState extends State<MyApp> {
                   .arguments as Map<String, String>;
               final String id = params['id']!;
               final String houseNumber = params['houseNumber']!;
-              return AddDataScreen(userId: id, houseNumber:houseNumber ,);
+              final String userName = params['userName']??'';
+              final String? consumerType = params['consumerType'];
+              final String? meterNumber = params['meterNumber'];
+              return AddDataScreen(userId: id, houseNumber:houseNumber , userName: userName, consumerType: consumerType, meterNumber: meterNumber,);
             },
             '/admin/editData': (context) {
               final Map<String, dynamic> params = ModalRoute.of(context)!

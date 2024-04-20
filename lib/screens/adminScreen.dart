@@ -2,7 +2,9 @@ import "dart:convert";
 
 import "package:electric/resources/changingDatabase.dart";
 import "package:electric/widgets/houseCard.dart";
+import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import "package:flutter/widgets.dart";
 import "package:http/http.dart" as http;
 import "package:shared_preferences/shared_preferences.dart";
 
@@ -17,9 +19,16 @@ class _AdminScreenState extends State<AdminScreen> {
   List<dynamic> userData = [];
   bool isLoading = true;
   String errorMessage = '';
-  double? meterRent;
-  double? unitRate;
-  double? gst ;
+  String? meterRent;
+  String? unitRate;
+  String? gst ;
+  bool changedGst = false;
+  bool changedMeterRent = false;
+  bool changedUnitRate = false;
+  TextEditingController meterRentController = TextEditingController();
+  TextEditingController unitRateController = TextEditingController();
+  TextEditingController gstController = TextEditingController();
+
 
 
   List<dynamic> filteredData = []; // To store the filtered data
@@ -30,15 +39,22 @@ class _AdminScreenState extends State<AdminScreen> {
   void initState() {
     super.initState();
     fetchUserData();
+    fetchConstants();
     
   }
 
   Future <void> fetchConstants() async{
-    Map<String, dynamic> constants = await fetchDefaultValues();
+    List<dynamic> constants = await fetchDefaultValues();
+     Map<String, dynamic> constantsMap = {
+    for (var item in constants) item['key']: item['value']
+  };
     setState(() {
-      meterRent = constants['meterRent'];
-      unitRate = constants['unitRate'];
-      gst = constants['gst'];
+      meterRent = constantsMap['meterRent'];
+      unitRate = constantsMap['unitRate'];
+      gst = constantsMap['gst'];
+      meterRentController.text = constantsMap['meterRent'].toString();
+      unitRateController.text = constantsMap['unitRate'].toString();
+      gstController.text = constantsMap['gst'].toString();
     });
 
   }
@@ -110,6 +126,8 @@ class _AdminScreenState extends State<AdminScreen> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text('User Data', style: TextStyle(color: Colors.white)),
@@ -145,33 +163,109 @@ class _AdminScreenState extends State<AdminScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : filteredData.isNotEmpty
-              ? Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Meter Rent: ${meterRent.toString()}'),
-                        Text('Unit Rate: ${unitRate.toString()}'),
-                        Text('GST: ${gst.toString()}'),
-                      ],
-                    ),
+              ? 
+                 
+                  Column(
+                    children: [
+                      Container(
+                        height: 60,
+                        child: Row(children: [
+                          SizedBox(width: 8), 
+                          Expanded(
+                            child: TextField(
+                              onChanged: (value){
+                                setState(() {
+                                  changedMeterRent = true;
+                                });
+                              },
+                              controller: meterRentController,
+                              decoration: InputDecoration(
+                                labelText: 'Meter Rent',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+SizedBox(width: 8), 
+                          Expanded(
+                            child: TextField(
+                              onChanged: (value){
+                                setState(() {
+                                  changedUnitRate = true;
+                                });
+                              },
+                              controller: unitRateController,
+                              decoration: InputDecoration(
+                                labelText: 'Unit Rate',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+SizedBox(width: 8), 
+                          Expanded(
+                            child: TextField(
+                              controller: gstController,
+                              onChanged: (value){
+                                setState(() {
+                                  changedGst = true;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                labelText: 'GST',
+                                border: OutlineInputBorder(),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(width: 8), 
+
+                          ElevatedButton(onPressed: (){
+                            if(changedGst){
+                              if(gst!=null){
+                                updateConstant('gst', gstController.text);
+                              }
+                              else{
+                              addConstants('gst', gstController.text);}
+                            }
+                            if(changedMeterRent){
+                              if(meterRent != null){
+
+                                updateConstant('meterRent', meterRentController.text);
+                              }
+                              else{
+                              addConstants('meterRent', meterRentController.text);}
+                            }
+                            if(changedUnitRate){
+                              if(unitRate != null){
+                                updateConstant('unitRate', unitRateController.text);
+                              }
+                              else{
+                              addConstants('unitRate', unitRateController.text);}
+
+                            }
+                          }, child: Text('Update Constants'))
+                        ],)
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: filteredData.length,
+                          itemBuilder: (context, index) {
+                            Map<String, dynamic> user = filteredData[index];
+                            return HouseCard(
+                              indexNumber: index,
+                              houseNumber: user['houseNumber'],
+                              email: user['email'],
+                              userId: user['_id'],
+                              lastAdded: user['lastAddition'],
+                              userName: user['userName'],
+                              consumerType: user['consumerType']??'',
+                              meterNumber: user['meterNumber']??'',
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   )
-                  ,ListView.builder(
-                    itemCount: filteredData.length,
-                    itemBuilder: (context, index) {
-                      Map<String, dynamic> user = filteredData[index];
-                      return HouseCard(
-                        indexNumber: index,
-                        houseNumber: user['houseNumber'],
-                        email: user['email'],
-                        userId: user['_id'],
-                        lastAdded: user['lastAddition'],
-                      );
-                    },
-                  ),]
-              )
+              
               : Center(child: Text(errorMessage.isNotEmpty ? errorMessage : 'No user data available')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {

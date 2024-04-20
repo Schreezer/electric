@@ -26,13 +26,16 @@ class EditUserScreen extends StatefulWidget {
 class _EditUserScreenState extends State<EditUserScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController houseNumberController = TextEditingController();
+  final TextEditingController consumerTypeController = TextEditingController();
+  final TextEditingController userNameController = TextEditingController();
+  final TextEditingController meterNumberController = TextEditingController();
   String userType = 'Consumer';
   Future<Map<String, dynamic>> user = Future.value({});
 
   String update(){
     
     try {
-      updateUser(widget.userId, emailController.text, houseNumberController.text, userType).then((value) => 
+      updateUser(widget.userId, emailController.text, houseNumberController.text, userType, userNameController.text, consumerTypeController.text, meterNumberController.text).then((value) => 
       showAutoDismissDialog(context, "User Successfully Updated"));
       return 'User updated';
     } catch (e) {
@@ -49,9 +52,17 @@ class _EditUserScreenState extends State<EditUserScreen> {
     // Fetch user details using widget.userId
     user = getUserData(widget.userId);
     user.then((userData) {
+      print("the current user type is ${userData['consumerType']}");
+      setState(() {
+        meterNumberController.text = userData['meterNumber']??'';
+        consumerTypeController.text = userData['consumerType']??'';
+        userNameController.text = userData['userName']?? '';
       emailController.text = userData['email'];
       houseNumberController.text = userData['houseNumber'];
       userType = userData['userType'].toLowerCase() == 'admin' ? 'Admin' : 'Consumer';
+      });
+      
+      
     });
   }
 
@@ -66,6 +77,10 @@ class _EditUserScreenState extends State<EditUserScreen> {
         child: Column(
           children: [
             TextField(
+              controller: userNameController,
+              decoration: InputDecoration(labelText: 'User Name'),
+            ),
+            TextField(
               controller: emailController,
               decoration: InputDecoration(labelText: 'Email'),
             ),
@@ -73,6 +88,41 @@ class _EditUserScreenState extends State<EditUserScreen> {
             TextField(
               controller: houseNumberController,
               decoration: InputDecoration(labelText: 'House Number'),
+            ),
+            TextField(
+              controller: meterNumberController,
+              decoration: InputDecoration(labelText: 'Meter Number'),
+            ),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelText: 'Type',
+              ),
+              value: consumerTypeController.text.isNotEmpty ? consumerTypeController.text.toString() : null,
+              items: [
+                DropdownMenuItem<String>(
+                  value: 'Domestic',
+                  child: Text('Domestic'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'ShopKeeper',
+                  child: Text('ShopKeeper'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'Director',
+                  child: Text('Director'),
+                ),
+                DropdownMenuItem(child: Text("1"), value: "1"),
+                DropdownMenuItem(child: Text("2"), value: "2"),
+                DropdownMenuItem(child: Text("3"), value: "3"),
+                DropdownMenuItem(child: Text("4"), value: "4"),
+                DropdownMenuItem(child: Text("5"), value: "5"),
+                DropdownMenuItem(child: Text("6"), value: "6"),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  consumerTypeController.text = value!;
+                });
+              },
             ),
             DropdownButton<String>(
               value: userType,
@@ -99,6 +149,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text('Are you sure you want to edit the following user?'),
+                          Text('User Name: ${userNameController.text}'),
                           Text('Email: ${emailController.text}'),
                           Text('House Number: ${houseNumberController.text}'),
                           Text('User Type: $userType'),
