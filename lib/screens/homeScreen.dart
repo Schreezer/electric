@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:electric/models/billData.dart';
 import 'package:electric/resources/changingDatabase.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<BillData> bills = [];
   BillData? selectedBill;
+   List<String> billIds = [];
+  // late String seelctedBillId;
 
   Future<void> getBills() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -22,11 +26,16 @@ class _HomeScreenState extends State<HomeScreen> {
     var fetchedBills = await getUserData(id!) ;
     List<BillData> loadedBills = [];
     for (var bill in fetchedBills['data']) {
+      print("we are ade");
       loadedBills.add(BillData.fromJson(bill));
+      print("the bill id is :");
+      print(bill['_id']);
+      billIds.add(bill['_id']);
     }
     setState(() {
       bills = loadedBills;
       selectedBill = bills.isNotEmpty ? bills[0] : null;
+      // seelctedBillId = billIds.isNotEmpty ? billIds[0] : '';
     });
   }
 
@@ -119,6 +128,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 totalAmountPayable: selectedBill?.netPayable.toDouble() ?? 0,
               ),
               const SizedBox(height: 30),
+              // a button to route to comments screen
+              
+              ElevatedButton(
+                onPressed: ()async {
+                  SharedPreferences prefs = await SharedPreferences.getInstance();
+                  Navigator.pushNamed(context, '/comments', arguments: {
+                    'userId': prefs.getString('id') ,
+                    'billId': "seelctedBillId"
+                    // seelctedBillId,
+                  });
+                },
+                child: const Text('Comments'),
+              ),
 
             ],
           ),
@@ -133,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onChanged: (BillData? newValue) {
         setState(() {
           selectedBill = newValue!;
+          // seelctedBillId = billIds[bills.indexOf(newValue)];
         });
       },
       items: bills.map<DropdownMenuItem<BillData>>((BillData bill) {

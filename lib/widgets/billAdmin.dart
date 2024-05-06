@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:electric/screens/editData.dart';
 import 'package:intl/intl.dart';
+
 class BillCardAdmin extends StatefulWidget {
   final Map<String, dynamic> jsonData;
   final String userId;
@@ -17,17 +18,22 @@ class BillCardAdmin extends StatefulWidget {
 
 class _BillCardAdminState extends State<BillCardAdmin> {
   void edit(BuildContext context) async {
-    final result = await Navigator.pushNamed(context, '/admin/bills/editBill', arguments: {'data': widget.jsonData, 'userId': widget.userId});
+    final result = await Navigator.pushNamed(context, '/admin/bills/editBill',
+        arguments: {'data': widget.jsonData, 'userId': widget.userId});
     if (result == true) {
       print("result is true");
-      Navigator.pushReplacementNamed(context, '/admin/bills', arguments: {'id': widget.userId});
+      Navigator.pushReplacementNamed(context, '/admin/bills',
+          arguments: {'id': widget.userId});
     }
   }
+
   void comments(BuildContext context) async {
-    final result = await Navigator.pushNamed(context, '/admin/bills/comments', arguments: {'userId': widget.userId, 'billId': widget.jsonData['_id']});
+    final result = await Navigator.pushNamed(context, '/admin/bills/comments',
+        arguments: {'userId': widget.userId, 'billId': widget.jsonData['_id']});
     if (result == true) {
       print("result is true");
-      Navigator.pushReplacementNamed(context, '/admin/bills', arguments: {'id': widget.userId});
+      Navigator.pushReplacementNamed(context, '/admin/bills',
+          arguments: {'id': widget.userId});
     }
   }
 
@@ -53,15 +59,13 @@ class _BillCardAdminState extends State<BillCardAdmin> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
-                
+              Text(
+                'Date of Issue: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.jsonData['dateOfIssue']))}',
 
-                Text(
-                  'Date of Issue: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.jsonData['dateOfIssue']))}',
-
-                
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // Enhanced style
-                ),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold), // Enhanced style
+              ),
               SizedBox(height: 8),
               Text(
                 'Consumer Name: ${widget.jsonData['consumerName']}',
@@ -82,30 +86,36 @@ class _BillCardAdminState extends State<BillCardAdmin> {
                 alignment: Alignment.centerRight,
                 child: Row(
                   children: [
-                     ElevatedButton(
+                    ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor, // Use the theme's primary color
+                        backgroundColor: Theme.of(context)
+                            .primaryColor, // Use the theme's primary color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: ()=> 
-                      edit(context),
+                      onPressed: () => edit(context),
                       // MaterialPageRoute(builder: (context) => EditScreen(data: widget.jsonData, userId: widget.userId,))),
                       // Navigator.pushNamed(context, '/admin/bills/editBill', arguments: {'data': widget.jsonData , 'userId': widget.userId}),
-                        child: Text('Edit', style: TextStyle(color: Colors.white)), // Corrected fontColor to color
+                      child: Text('Edit',
+                          style: TextStyle(
+                              color: Colors
+                                  .white)), // Corrected fontColor to color
                     ),
                     Expanded(child: Container()),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor, // Use the theme's primary color
+                        backgroundColor: Theme.of(context)
+                            .primaryColor, // Use the theme's primary color
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: ()=> 
-                        comments(context),
-                        child: Text('Comments', style: TextStyle(color: Colors.white)), // Corrected fontColor to color
+                      onPressed: () => comments(context),
+                      child: Text('Comments',
+                          style: TextStyle(
+                              color: Colors
+                                  .white)), // Corrected fontColor to color
                     ),
                   ],
                 ),

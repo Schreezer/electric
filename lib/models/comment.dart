@@ -5,6 +5,9 @@ class Comment{
   String? date;
   String? writer;
 
+
+  // constructor
+  Comment({this.text, this.date, this.writer});
   // toJson
   Map<String,dynamic> toJson(Comment data){
     return {
@@ -16,7 +19,8 @@ class Comment{
   // fromJson
   Comment.fromJson(Map<String,dynamic> json){
     text = json['text'];
-    date = json['date'];
+    date = json['date']?? json['createdAt'];
     writer = json['writer'];
   }
+
 }

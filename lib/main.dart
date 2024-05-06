@@ -75,6 +75,15 @@ class _MyAppState extends State<MyApp> {
             '/login': (context) => const LoginScreen(),
             '/choice': (context) => const ChoiceScreen(),
             '/home': (context) => const HomeScreen(),
+            '/comments': (context){
+              final Map<String, dynamic> params = ModalRoute.of(context)!
+                  .settings
+                  .arguments as Map<String, dynamic>;
+              final String id = params['userId']!;
+              final String billId = params['billId']!;
+              return CommentsScreen(userId:  id, billId: billId);
+            
+            },
             '/admin': (context) => AdminScreen(),
             '/admin/new': (context) => const AddUserScreen(),
             '/admin/bills': (context){
