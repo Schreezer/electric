@@ -17,6 +17,42 @@ class _AddUserScreenState extends State<AddUserScreen> {
   final TextEditingController meterNumberController = TextEditingController();
   String userType = 'Consumer';
 
+  String? userNameError;
+  String? emailError;
+  String? meterNumberError;
+
+  bool validateUserName() {
+    String pattern =
+        r'^[a-zA-Z ]+$'; // Regular expression for letters and spaces
+    RegExp regex = RegExp(pattern);
+    if (!regex.hasMatch(userNameController.text)) {
+      userNameError = 'User name must contain only letters and spaces';
+      return false;
+    }
+    userNameError = null;
+    return true;
+  }
+
+  bool validateEmail() {
+    String pattern = r'\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b';
+    RegExp regex = RegExp(pattern);
+    if (!regex.hasMatch(emailController.text)) {
+      emailError = 'Enter a valid email address';
+      return false;
+    }
+    emailError = null;
+    return true;
+  }
+
+  bool validateMeterNumber() {
+    if (int.tryParse(meterNumberController.text) == null) {
+      meterNumberError = 'Meter number must be an integer';
+      return false;
+    }
+    meterNumberError = null;
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,11 +65,19 @@ class _AddUserScreenState extends State<AddUserScreen> {
           children: [
             TextField(
               controller: userNameController,
-              decoration: InputDecoration(labelText: 'User Name'),
+              decoration: InputDecoration(
+                labelText: 'User Name',
+                errorText: userNameError,
+              ),
+              onChanged: (value) => setState(validateUserName),
             ),
             TextField(
               controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                errorText: emailError,
+              ),
+              onChanged: (value) => setState(validateEmail),
             ),
             TextField(
               controller: houseNumberController,
@@ -41,13 +85,19 @@ class _AddUserScreenState extends State<AddUserScreen> {
             ),
             TextField(
               controller: meterNumberController,
-              decoration: InputDecoration(labelText: 'Meter Number'),
+              decoration: InputDecoration(
+                labelText: 'Meter Number',
+                errorText: meterNumberError,
+              ),
+              onChanged: (value) => setState(validateMeterNumber),
             ),
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
                 labelText: 'Type',
               ),
-              value: consumerTypeController.text.isNotEmpty ? consumerTypeController.text : null,
+              value: consumerTypeController.text.isNotEmpty
+                  ? consumerTypeController.text
+                  : null,
               items: [
                 DropdownMenuItem<String>(
                   value: 'Domestic',
@@ -90,63 +140,72 @@ class _AddUserScreenState extends State<AddUserScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text('Confirm User Creation'),
-                      content:
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('Are you sure you want to create the following user?'),
-                              Text('User Name: ${userNameController.text}'),
-                              Text('Email: ${emailController.text}'),
-                              Text('House Number: ${houseNumberController.text}'),
-                              Text('Consumer Type: ${consumerTypeController.text}'),
-                              Text('User Type: $userType'),
-                            ],
+                if (validateUserName() &&
+                    validateEmail() &&
+                    validateMeterNumber()) {
+                  // Proceed with showing dialog
+                  // showDialog(context);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Confirm User Creation'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                                'Are you sure you want to create the following user?'),
+                            Text('User Name: ${userNameController.text}'),
+                            Text('Email: ${emailController.text}'),
+                            Text('House Number: ${houseNumberController.text}'),
+                            Text(
+                                'Consumer Type: ${consumerTypeController.text}'),
+                            Text('User Type: $userType'),
+                          ],
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Cancel'),
                           ),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('Cancel'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            createUser(
-                              emailController.text,
-                              houseNumberController.text,
-                              userType.toLowerCase(),
-                              userNameController.text,
-                              consumerTypeController.text,
-                              meterNumberController.text.toString(),
-                            ).then((responseData) {
-                              if (responseData == '201') {
-                                showSnackBar(
-                                    context, "User created successfully!");
-                                Navigator.pushNamed(context, '/home');
-                              }
-                              else if (responseData == '400') {
-                                showSnackBar(context, "Some error occured");
-                              }
-                              else {
-                                showSnackBar(context, "Error creating user! $responseData");
-                              }
-                            }).catchError((error) {
-                              // Handle error
-                              showSnackBar(context, error.toString());
-                            });
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('Confirm'),
-                        ),
-                      ],
-                    );
-                  },
-                );
+                          TextButton(
+                            onPressed: () {
+                              createUser(
+                                emailController.text,
+                                houseNumberController.text,
+                                userType.toLowerCase(),
+                                userNameController.text,
+                                consumerTypeController.text,
+                                meterNumberController.text.toString(),
+                              ).then((responseData) {
+                                if (responseData == '201') {
+                                  showSnackBar(
+                                      context, "User created successfully!");
+                                  Navigator.pushNamed(context, '/home');
+                                } else if (responseData == '400') {
+                                  showSnackBar(context, "Some error occured");
+                                } else {
+                                  showSnackBar(context,
+                                      "Error creating user! $responseData");
+                                }
+                              }).catchError((error) {
+                                // Handle error
+                                showSnackBar(context, error.toString());
+                              });
+                              Navigator.of(context).pop();
+                            },
+                            child: Text('Confirm'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  showSnackBar(
+                      context, 'Please correct the errors before submitting.');
+                }
               },
               child: Text('Create User'),
             ),

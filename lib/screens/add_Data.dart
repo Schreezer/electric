@@ -18,7 +18,12 @@ class AddDataScreen extends StatefulWidget {
   final String? consumerType;
   final String? meterNumber;
   const AddDataScreen(
-      {Key? key, required this.userId, required this.houseNumber, this.userName, this.consumerType, this.meterNumber})
+      {Key? key,
+      required this.userId,
+      required this.houseNumber,
+      this.userName,
+      this.consumerType,
+      this.meterNumber})
       : super(key: key);
 
   @override
@@ -27,13 +32,17 @@ class AddDataScreen extends StatefulWidget {
 
 Widget TextF(String hintText, TextEditingController controller, bool editable,
     {TextInputType keyboardType = TextInputType.text,
+    bool isValid = true,
+    String errorMessage = "Please enter a valid integer",
     void Function(String)? onChanged}) {
+  // Corrected to include onChanged
   return TextField(
     enabled: editable,
     controller: controller,
     keyboardType: keyboardType,
-    onChanged: onChanged,
+    onChanged: onChanged, // Correct usage of onChanged within TextField
     decoration: InputDecoration(
+      errorText: isValid ? null : errorMessage,
       labelText: hintText,
       hintText: hintText,
       border: OutlineInputBorder(
@@ -48,13 +57,15 @@ class _AddDataScreenState extends State<AddDataScreen> {
   TextEditingController _houseNumberController = TextEditingController();
   TextEditingController _meterNumberController = TextEditingController();
   TextEditingController _typeController = TextEditingController();
-  DateTime _startDate = DateTime(DateTime.now().year, DateTime.now().month - 1, 16);
+  DateTime _startDate =
+      DateTime(DateTime.now().year, DateTime.now().month - 1, 16);
   bool selectedStart = true;
   bool selectedEnd = true;
   DateTime _endDate = DateTime(DateTime.now().year, DateTime.now().month, 15);
 
   bool selectedIssue = false;
-  late DateTime _issueDate = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  late DateTime _issueDate =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   double totalConsumed = 0;
 
   TextEditingController _startDateController = TextEditingController();
@@ -72,6 +83,33 @@ class _AddDataScreenState extends State<AddDataScreen> {
   // TextEditingController _energyChargesPerUnitController =
   //     TextEditingController();
 
+  bool _isValidMeterNumber = true;
+  bool _isValidPreviousReading = true;
+  bool _isValidCurrentReading = true;
+  // Add validation methods
+  void validateMeterNumber() {
+    setState(() {
+      _isValidMeterNumber = _validateInteger(_meterNumberController.text);
+    });
+  }
+
+  void validatePreviousReading() {
+    setState(() {
+      _isValidPreviousReading =
+          _validateInteger(_previousReadingController.text);
+    });
+  }
+
+  void validateCurrentReading() {
+    setState(() {
+      _isValidCurrentReading = _validateInteger(_currentReadingController.text);
+    });
+  }
+
+  bool _validateInteger(String value) {
+    return int.tryParse(value) != null;
+  }
+
   TextEditingController _totalEnergyChargeController = TextEditingController();
 
   void showAutoDismissDialog(BuildContext context, String message) {
@@ -88,7 +126,6 @@ class _AddDataScreenState extends State<AddDataScreen> {
     );
   }
 
-
   void calculateTotalUnitsConsumed() {
     if (_currentReadingController.text.isNotEmpty &&
         _previousReadingController.text.isNotEmpty) {
@@ -99,6 +136,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
       });
     }
   }
+
   void calculateEnergy() {
     if (_energyChargeController.text.isNotEmpty &&
         _totalUnitsConsumedController.text.isNotEmpty) {
@@ -182,14 +220,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
     super.initState();
     setState(() {
       _houseNumberController = TextEditingController(text: widget.houseNumber);
-    _consumerNameController = TextEditingController(text: widget.userName);
-    _typeController = TextEditingController(text: widget.consumerType);
-    _meterNumberController = TextEditingController(text: widget.meterNumber);
-    _numberOfDaysController = TextEditingController(
-      text: (_endDate.difference(_startDate).inDays).toString()
-    );
+      _consumerNameController = TextEditingController(text: widget.userName);
+      _typeController = TextEditingController(text: widget.consumerType);
+      _meterNumberController = TextEditingController(text: widget.meterNumber);
+      _numberOfDaysController = TextEditingController(
+          text: (_endDate.difference(_startDate).inDays).toString());
     });
-    
+
     fetchConstants();
   }
 
@@ -200,8 +237,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
     };
     setState(() {
       _meterRentController.text = constantsMap['meterRent'].toString();
-      _energyChargeController.text =
-          constantsMap['unitRate'].toString();
+      _energyChargeController.text = constantsMap['unitRate'].toString();
       _gstController.text = constantsMap['gst'].toString();
     });
   }
@@ -216,7 +252,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
             SizedBox(
               height: 10,
             ),
-            TextF('Consumer Name', _consumerNameController, true),
+            TextF('Consumer Name', _consumerNameController, false),
             SizedBox(
               height: 10,
             ),
@@ -232,8 +268,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
             TextF(
               'Meter Number',
               _meterNumberController,
-              true,
-              // keyboardType: TextInputType.number,
+              false,
+              keyboardType: TextInputType.number,
+              isValid: _isValidMeterNumber,
+              errorMessage: "Please enter a valid integer",
+              onChanged: (value) {
+                validateMeterNumber();
+              },
             ),
             SizedBox(
               height: 10,
@@ -242,7 +283,8 @@ class _AddDataScreenState extends State<AddDataScreen> {
               decoration: InputDecoration(
                 labelText: 'Type',
               ),
-              value: _typeController.text.isNotEmpty ? _typeController.text : null,
+              value:
+                  _typeController.text.isNotEmpty ? _typeController.text : null,
               items: [
                 DropdownMenuItem<String>(
                   value: 'Domestic',
@@ -262,13 +304,13 @@ class _AddDataScreenState extends State<AddDataScreen> {
                 DropdownMenuItem(child: Text("4"), value: "4"),
                 DropdownMenuItem(child: Text("5"), value: "5"),
                 DropdownMenuItem(child: Text("6"), value: "6"),
-
               ],
-              onChanged: (value) {
-                setState(() {
-                  _typeController.text = value!;
-                });
-              },
+              onChanged: null,
+              // onChanged: (value) {
+              //   setState(() {
+              //     _typeController.text = value!;
+              //   });
+              // },
             ),
             SizedBox(
               height: 10,
@@ -291,7 +333,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                       _numberOfDaysController.text =
                           (_endDate.difference(_startDate).inDays + 1)
                               .toString();
-                              calcAll() ;
+                      calcAll();
                     }
                   });
                 }
@@ -321,7 +363,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                       _numberOfDaysController.text =
                           (_endDate.difference(_startDate).inDays + 1)
                               .toString();
-                              calcAll();
+                      calcAll();
                     }
                   });
                 }
@@ -352,9 +394,11 @@ class _AddDataScreenState extends State<AddDataScreen> {
               _previousReadingController,
               true,
               keyboardType: TextInputType.number,
+              isValid: _isValidPreviousReading,
+              errorMessage: "Please enter a valid integer",
               onChanged: (value) {
-                calcAll();
-              },  
+                validatePreviousReading();
+              },
             ),
             SizedBox(
               height: 10,
@@ -364,13 +408,15 @@ class _AddDataScreenState extends State<AddDataScreen> {
               _currentReadingController,
               true,
               keyboardType: TextInputType.number,
+              isValid: _isValidCurrentReading,
+              errorMessage: "Please enter a valid integer",
               onChanged: (value) {
+                validateCurrentReading();
                 calcAll();
               },
             ),
             SizedBox(height: 10),
-            TextF("Energy Charges Per Unit", _energyChargeController,
-                true,
+            TextF("Energy Charges Per Unit", _energyChargeController, false,
                 keyboardType: TextInputType.number, onChanged: (value) {
               calcAll();
             }),
@@ -398,22 +444,17 @@ class _AddDataScreenState extends State<AddDataScreen> {
             SizedBox(
               height: 10,
             ),
-            TextF(
-              'Meter Rent',
-              _meterRentController,
-              true,
-              keyboardType: TextInputType.number,
-              onChanged: (va){
-                calcAll();
-              }
-            ),
+            TextF('Meter Rent', _meterRentController, false,
+                keyboardType: TextInputType.number, onChanged: (va) {
+              calcAll();
+            }),
             SizedBox(
               height: 10,
             ),
             TextF(
               'GST (%)',
               _gstController,
-              true,
+              false,
               keyboardType: TextInputType.number,
               onChanged: (value) {
                 calcAll();
