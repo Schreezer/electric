@@ -282,3 +282,56 @@ Future updateConstant(String key, String value) async{
     throw e;
   }
 }
+
+Future addComment(String billId, String comment) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? currentJwt = prefs.getString('jwt');
+    String? userType = prefs.getString('userType');
+    
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/api/users/addComment'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $currentJwt',
+      },
+      body: jsonEncode(<String, String>{
+        'userId': prefs.getString('id')!,
+        'billId': billId,
+        'comment': comment,
+        'writer' : userType?? "user",
+      }),
+    );
+    
+    Map<String, dynamic> responseData = jsonDecode(response.body);
+    return responseData;
+  } catch (e) {
+    print("Error adding comment: $e");
+    throw e;
+  }
+}
+
+Future fetchComments(String billId, String userId) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? currentJwt = prefs.getString('jwt');
+    
+    final response = await http.post(
+      Uri.parse('http://localhost:3000/api/users/getComments'),
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $currentJwt',
+      },
+      body: jsonEncode(<String, String>{
+        'userId': userId,
+        'billId': billId,
+      }),
+    );
+    
+    List<dynamic> responseData = jsonDecode(response.body);
+    return responseData;
+  } catch (e) {
+    print("Error fetching comments: $e");
+    throw e;
+  }
+}

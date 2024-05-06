@@ -23,6 +23,13 @@ class _BillCardAdminState extends State<BillCardAdmin> {
       Navigator.pushReplacementNamed(context, '/admin/bills', arguments: {'id': widget.userId});
     }
   }
+  void comments(BuildContext context) async {
+    final result = await Navigator.pushNamed(context, '/admin/bills/comments', arguments: {'userId': widget.userId, 'billId': widget.jsonData['_id']});
+    if (result == true) {
+      print("result is true");
+      Navigator.pushReplacementNamed(context, '/admin/bills', arguments: {'id': widget.userId});
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +56,6 @@ class _BillCardAdminState extends State<BillCardAdmin> {
               
                 
 
-                // ...
-
                 Text(
                   'Date of Issue: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.jsonData['dateOfIssue']))}',
 
@@ -75,18 +80,34 @@ class _BillCardAdminState extends State<BillCardAdmin> {
               SizedBox(height: 12),
               Align(
                 alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor, // Use the theme's primary color
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                child: Row(
+                  children: [
+                     ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor, // Use the theme's primary color
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: ()=> 
+                      edit(context),
+                      // MaterialPageRoute(builder: (context) => EditScreen(data: widget.jsonData, userId: widget.userId,))),
+                      // Navigator.pushNamed(context, '/admin/bills/editBill', arguments: {'data': widget.jsonData , 'userId': widget.userId}),
+                        child: Text('Edit', style: TextStyle(color: Colors.white)), // Corrected fontColor to color
                     ),
-                  ),
-                  onPressed: ()=> 
-                  edit(context),
-                  // MaterialPageRoute(builder: (context) => EditScreen(data: widget.jsonData, userId: widget.userId,))),
-                  // Navigator.pushNamed(context, '/admin/bills/editBill', arguments: {'data': widget.jsonData , 'userId': widget.userId}),
-                    child: Text('Edit', style: TextStyle(color: Colors.white)), // Corrected fontColor to color
+                    Expanded(child: Container()),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor, // Use the theme's primary color
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      onPressed: ()=> 
+                        comments(context),
+                        child: Text('Comments', style: TextStyle(color: Colors.white)), // Corrected fontColor to color
+                    ),
+                  ],
                 ),
               ),
             ],

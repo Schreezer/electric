@@ -1,6 +1,8 @@
 
 import 'dart:convert';
 
+import 'package:electric/models/comment.dart';
+
 class BillData {
   String consumerName;
   String houseNumber;
@@ -18,6 +20,8 @@ class BillData {
   double totalAmount;
   int netPayable;
   DateTime dateOfIssue;
+  List<Comment>? comments;
+
 
   BillData({
     required this.consumerName,
@@ -36,6 +40,7 @@ class BillData {
     required this.totalAmount,
     required this.netPayable,
     required this.dateOfIssue,
+    this.comments,
   });
 
   Map<String,dynamic> toJson(BillData data){
@@ -56,6 +61,7 @@ class BillData {
         'totalAmount': data.totalAmount,
         'netPayable': data.netPayable,
         'dateOfIssue': data.dateOfIssue.toLocal().toIso8601String(),
+        'comments': data.comments,
     };
 }
 factory BillData.fromJson(Map<String, dynamic> json) {
@@ -76,6 +82,7 @@ factory BillData.fromJson(Map<String, dynamic> json) {
   double? totalAmount = json['totalAmount'];
   int? netPayable = json['netPayable'];
   DateTime? dateOfIssue = json['dateOfIssue'] != null ? DateTime.parse(json['dateOfIssue']) : null;
+  List<Comment>? comments = json['comments'] != null ? (json['comments'] as List).map((i) => Comment.fromJson(i)).toList() : null;
 
   if (consumerName == null) {
     print('consumerName is null');
@@ -125,6 +132,9 @@ factory BillData.fromJson(Map<String, dynamic> json) {
   if (dateOfIssue == null) {
     print('dateOfIssue is null');
   }
+  if (comments == null) {
+    print('comments is null');
+  }
 
   return BillData(
     consumerName: consumerName!,
@@ -143,6 +153,7 @@ factory BillData.fromJson(Map<String, dynamic> json) {
     totalAmount: totalAmount!,
     netPayable: netPayable!,
     dateOfIssue: dateOfIssue!,
+    comments: comments,
   );
 }
 }

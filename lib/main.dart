@@ -1,7 +1,10 @@
+import 'dart:html';
+
 import 'package:electric/providers/userProvider.dart';
 import 'package:electric/screens/add_Data.dart';
 import 'package:electric/screens/adminScreen.dart';
 import 'package:electric/screens/choice.dart';
+import 'package:electric/screens/commentsScreen.dart';
 import 'package:electric/screens/editData.dart';
 import 'package:electric/screens/editUserScreen.dart';
 import 'package:electric/screens/entryPoint.dart';
@@ -15,6 +18,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:async' ;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -116,6 +120,15 @@ class _MyAppState extends State<MyApp> {
             },
             // 'admin/more': (context) => const TestScreen(),
             // '/profile': (context) => const ProfileScreen(),
+            '/admin/bills/comments': (context){
+              final Map<String, dynamic> params = ModalRoute.of(context)!
+                  .settings
+                  .arguments as Map<String, dynamic>;
+              final String id = params['userId']!;
+              final String billId = params['billId']!;
+              return CommentsScreen(userId:  id, billId: billId);
+            
+            }
           },
           // home: const LoginScreen(),
         ));
