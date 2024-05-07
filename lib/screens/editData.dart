@@ -55,42 +55,55 @@ class _EditScreenState extends State<EditScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
-    _consumerNameController.text = widget.data['consumerName'];
-    _houseNumberController.text = widget.data['houseNumber'];
-    _meterNumberController.text = widget.data['meterNumber'].toString();
-    // _typeController.text = widget.data['type'];
-    _startDate = DateTime.parse(widget.data['startDate']);
-    _endDate = DateTime.parse(widget.data['endDate']);
-    _issueDate = DateTime.parse(widget.data['dateOfIssue']);
-    _startDateController.text = widget.data['startDate'];
-    _endDateController.text = widget.data['endDate'];
-    _numberOfDaysController.text = widget.data['numberOfDays'].toString();
-    _previousReadingController.text = widget.data['previousReading'].toString();
-    _currentReadingController.text = widget.data['currentReading'].toString();
-    _totalUnitsConsumedController.text =
-        widget.data['totalUnitsConsumed'].toString();
-    _energyChargeController.text = widget.data['energyCharge'].toString();
-    _meterRentController.text = widget.data['meterRent'].toString();
-    _gstController.text = widget.data['gst'].toString();
-    _totalAmountController.text = widget.data['totalAmount'].toString();
-    _netPayableController.text = widget.data['netPayable'].toString();
-    _dateOfIssueController.text = widget.data['dateOfIssue'];
-    _consumerTypeController.text = widget.data['type'];
-    double? totalUnits = double.tryParse(_totalUnitsConsumedController.text);
-    double? energyCharge = double.tryParse(_energyChargeController.text);
-    if (totalUnits != null && energyCharge != null) {
-      _totalEnergyChargeController.text =
-          (totalUnits * energyCharge).toString();
-    } else {
-      _totalEnergyChargeController.text =
-          '0'; // or handle this case appropriately
-    }
     super.initState();
+    setState(() {
+      _consumerNameController.text = widget.data['consumerName'];
+      _houseNumberController.text = widget.data['houseNumber'];
+      _meterNumberController.text = widget.data['meterNumber'].toString();
+      // _typeController.text = widget.data['type'];
+      _startDate = DateTime.parse(widget.data['startDate']);
+      _endDate = DateTime.parse(widget.data['endDate']);
+      _issueDate = DateTime.parse(widget.data['dateOfIssue']);
+      _startDateController.text = widget.data['startDate'];
+      _endDateController.text = widget.data['endDate'];
+      _numberOfDaysController.text = widget.data['numberOfDays'].toString();
+      _previousReadingController.text =
+          widget.data['previousReading'].toString();
+      _currentReadingController.text = widget.data['currentReading'].toString();
+      _totalUnitsConsumedController.text =
+          widget.data['totalUnitsConsumed'].toString();
+      _energyChargeController.text = widget.data['energyCharge'].toString();
+      _meterRentController.text = widget.data['meterRent'].toString();
+      _gstController.text = widget.data['gst'].toString();
+      _totalAmountController.text = widget.data['totalAmount'].toString();
+      _netPayableController.text = widget.data['netPayable'].toString();
+      _dateOfIssueController.text = widget.data['dateOfIssue'];
+      _consumerTypeController.text = widget.data['type'];
+      double? totalUnits = double.tryParse(_totalUnitsConsumedController.text);
+      double? energyCharge = double.tryParse(_energyChargeController.text);
+      if (totalUnits != null && energyCharge != null) {
+        _totalEnergyChargeController.text =
+            (totalUnits * energyCharge).toString();
+      } else {
+        _totalEnergyChargeController.text =
+            '0'; // or handle this case appropriately
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    void calculateTotalUnitsConsumed() {
+      if (_currentReadingController.text.isNotEmpty &&
+          _previousReadingController.text.isNotEmpty) {
+        setState(() {
+          totalConsumed = double.parse(_currentReadingController.text) -
+              double.parse(_previousReadingController.text);
+          _totalUnitsConsumedController.text = totalConsumed.toString();
+        });
+      }
+    }
+
     void calculateEnergy() {
       if (_energyChargeController.text.isNotEmpty &&
           _totalUnitsConsumedController.text.isNotEmpty) {
@@ -124,11 +137,13 @@ class _EditScreenState extends State<EditScreen> {
 
     void calcAll() {
       print("i was called");
+      calculateTotalUnitsConsumed();
       calculateEnergy();
       calculateTotalAmount();
     }
 
     Future saveData(BuildContext contxt) async {
+      print(" the total amount is as follows: ${double.tryParse(_totalAmountController.text)}");
       try {
         BillData data = BillData.fromJson({
           'consumerName': _consumerNameController.text,
@@ -145,9 +160,10 @@ class _EditScreenState extends State<EditScreen> {
           'energyCharge': int.tryParse(_energyChargeController.text),
           'meterRent': int.tryParse(_meterRentController.text),
           'gst': int.tryParse(_gstController.text),
-          'totalAmount': int.tryParse(_totalAmountController.text),
+          'totalAmount': double.tryParse(_totalAmountController.text),
           'netPayable': int.tryParse(_netPayableController.text),
           'dateOfIssue': _issueDate.toLocal().toString().split(' ')[0],
+          'comments': [],
         });
 
         updateUserData(widget.userId, data, widget.data['_id']).then(
@@ -207,10 +223,10 @@ class _EditScreenState extends State<EditScreen> {
                       _startDate = pickedDate;
                       selectedStart = true;
                       if (_endDate != null) {
-                        calcAll();
                         _numberOfDaysController.text =
                             (_endDate.difference(_startDate).inDays + 1)
                                 .toString();
+                        calcAll();
                       }
                     });
                   }
@@ -231,13 +247,14 @@ class _EditScreenState extends State<EditScreen> {
                     print('Selected date: $pickedDate');
                     // Here you can assign pickedDate to your variable
                     setState(() {
-                      calcAll();
                       _endDate = pickedDate;
                       selectedEnd = true;
                       if (_startDate != null) {
                         _numberOfDaysController.text =
                             (_endDate.difference(_startDate).inDays + 1)
                                 .toString();
+
+                        calcAll();
                       }
                     });
                   }
@@ -260,11 +277,11 @@ class _EditScreenState extends State<EditScreen> {
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
                   if (_currentReadingController.text.isNotEmpty) {
-                    calcAll();
                     _totalUnitsConsumedController.text =
                         (int.tryParse(_currentReadingController.text)! -
                                 int.tryParse(_previousReadingController.text)!)
                             .toString();
+                    calcAll();
                   }
                 },
               ),

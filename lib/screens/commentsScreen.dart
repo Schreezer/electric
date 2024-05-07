@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:electric/models/comment.dart';
 import 'package:electric/resources/changingDatabase.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
@@ -230,11 +231,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 IconButton(
                   icon: const Icon(Icons.send),
                   onPressed: () async {
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
                     print("pressed");
                     _socketService.socket.emit('newComment', {
                       'billId': widget.billId,
                       'comment': _controller.text,
-                      'userId': widget.userId
+                      'userId': widget.userId,
+                      'writer': prefs.getString('userType'),
                     });
                     _controller.clear();
                   },

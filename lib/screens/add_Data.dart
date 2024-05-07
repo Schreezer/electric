@@ -87,8 +87,6 @@ class _AddDataScreenState extends State<AddDataScreen> {
       },
     );
   }
-
-
   void calculateTotalUnitsConsumed() {
     if (_currentReadingController.text.isNotEmpty &&
         _previousReadingController.text.isNotEmpty) {
@@ -330,11 +328,7 @@ class _AddDataScreenState extends State<AddDataScreen> {
                   ? "${_endDate.toLocal().toString().split(' ')[0]}"
                   : 'Select End Date'),
             ),
-            // TextF(
-            //   'End Date',
-            //   _endDateController,
-            //   true,
-            // ),
+
             SizedBox(
               height: 10,
             ),

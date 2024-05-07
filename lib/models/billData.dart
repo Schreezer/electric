@@ -40,7 +40,7 @@ class BillData {
     required this.totalAmount,
     required this.netPayable,
     required this.dateOfIssue,
-    this.comments,
+    this.comments = const [], // Set default value to empty list
   });
 
   Map<String,dynamic> toJson(BillData data){
@@ -61,7 +61,7 @@ class BillData {
         'totalAmount': data.totalAmount,
         'netPayable': data.netPayable,
         'dateOfIssue': data.dateOfIssue.toLocal().toIso8601String(),
-        'comments': data.comments,
+        'comments': data.comments??[],
     };
 }
 factory BillData.fromJson(Map<String, dynamic> json) {
@@ -82,7 +82,7 @@ factory BillData.fromJson(Map<String, dynamic> json) {
   double? totalAmount = json['totalAmount'];
   int? netPayable = json['netPayable'];
   DateTime? dateOfIssue = json['dateOfIssue'] != null ? DateTime.parse(json['dateOfIssue']) : null;
-  List<Comment>? comments = json['comments'] != null ? (json['comments'] as List).map((i) => Comment.fromJson(i)).toList() : null;
+  List<Comment> comments = json['comments'] != null ? (json['comments'] as List).map((i) => Comment.fromJson(i)).toList() : [];
 
   if (consumerName == null) {
     print('consumerName is null');
