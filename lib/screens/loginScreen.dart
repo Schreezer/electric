@@ -54,6 +54,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
+  var _otpSent = false;
+
 
   bool _isLoading1 = false;
   bool _isLoading2 = false;
@@ -104,6 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading1 = false;
       });
+      _otpSent = true;
       return true;
     } else {
       showSnackBar(context, res);

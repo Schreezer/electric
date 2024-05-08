@@ -178,10 +178,14 @@ class _AddDataScreenState extends State<AddDataScreen> {
   Future addData(BuildContext contxt) async {
     try {
       // Add data to the database
-      print("the total amount is as follows: ");
-      print(double.tryParse(_totalAmountController.text));
+      if (int.tryParse(_previousReadingController.text)! > int.tryParse(_currentReadingController.text)!){
+          showSnackBar(contxt, "Previous reading cannot be greater than current reading");
+          return false;
+        }
+            
 
       String value = await addUserData(
+        
           widget.userId,
           BillData.fromJson({
             'consumerName': _consumerNameController.text,
@@ -556,6 +560,10 @@ class _AddDataScreenState extends State<AddDataScreen> {
                         Future.delayed(Duration(seconds: 2), () {
                           Navigator.pushReplacementNamed(context, '/admin');
                         });
+                      }
+                      else{
+                        print("Error adding data h");
+                        showSnackBar(context, "Error adding data, please check and try again.");
                       }
 
                       // Add data to the database
