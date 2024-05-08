@@ -165,7 +165,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     controller: _socketService.scrollController,
                     itemCount: comments.length,
                     itemBuilder: (context, index) {
-                      bool isAdmin = comments[index].writer ==
+                      bool isAdmin = comments[index].writer!.toLowerCase() ==
                           'admin'; // Check if the writer is admin
                       return Align(
                         alignment: isAdmin

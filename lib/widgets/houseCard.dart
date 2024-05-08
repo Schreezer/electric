@@ -126,7 +126,7 @@ class _HouseCardState extends State<HouseCard> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Index: ${widget.indexNumber}',
+                'User: ${widget.userName ?? 'No data'}',
                 style: TextStyle(fontSize: 18),
               ),
               const SizedBox(height: 6),
@@ -134,16 +134,16 @@ class _HouseCardState extends State<HouseCard> {
                 'Email: ${widget.email}',
                 style: TextStyle(fontSize: 18),
               ),
-              const SizedBox(height: 6),
-              Text(
-                widget.lastAdded != null
-                    ? 'Last Added: ${formatDate(widget.lastAdded)}'
-                    : 'No data',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
+              // const SizedBox(height: 6),
+              // Text(
+              //   widget.lastAdded != null
+              //       ? 'Last Added: ${formatDate(widget.lastAdded)}'
+              //       : 'No data',
+              //   style: TextStyle(
+              //     fontSize: 18,
+              //     fontStyle: FontStyle.italic,
+              //   ),
+              // ),
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -184,9 +184,58 @@ class _HouseCardState extends State<HouseCard> {
                       backgroundColor: Colors.green,
                     ),
                   ),
-                  Expanded(
-                    child: Container(),
-                  ),
+                    Expanded(
+                    child: Row(
+                      children: [
+                      Expanded(child: Container()),
+                      IconButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Confirmation'),
+                                content: Text('Are you sure you want to delete this user?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context).pop(); // Close the dialog
+                                      await deleteUser(widget.userId);
+                                      // reload the page
+                                      Navigator.pushReplacementNamed(context, '/admin');
+                                    },
+                                    child: Text('Yes'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close the dialog
+                                    },
+                                    child: Text('No'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        tooltip: 'Delete User',
+                        splashRadius: 20,
+                        color: Colors.red,
+                        constraints: BoxConstraints(),
+                        padding: EdgeInsets.zero,
+                        alignment: Alignment.center,
+                        visualDensity: VisualDensity(),
+                        iconSize: 20,
+                        splashColor: Colors.red[100],
+                        icon: Icon(
+                        Icons.delete,
+                        size: 20,
+                        color: Colors.red,
+                        ),
+                      ),
+                      ],
+                    ),
+                    ),
+                  
                 ],
               ),
             ],

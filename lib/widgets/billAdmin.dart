@@ -1,3 +1,4 @@
+import 'package:electric/resources/changingDatabase.dart';
 import 'package:flutter/material.dart';
 import 'package:electric/screens/editData.dart';
 import 'package:intl/intl.dart';
@@ -59,12 +60,72 @@ class _BillCardAdminState extends State<BillCardAdmin> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Date of Issue: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.jsonData['dateOfIssue']))}',
+              Row(
+                children: [
+                  Text(
+                    'Date of Issue: ${DateFormat('yyyy-MM-dd').format(DateTime.parse(widget.jsonData['dateOfIssue']))}',
 
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold), // Enhanced style
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold), // Enhanced style
+                  ),
+                  Expanded(
+                      child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Confirmation'),
+                                content: Text(
+                                    'Are you sure you want to delete this Bill?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context)
+                                          .pop(); // Close the dialog
+                                      await deleteBill(widget.userId, widget.jsonData['_id']);
+                                      // reload the page
+                                      Navigator.pushReplacementNamed(
+                                          context, '/admin/bills', arguments: {'id': widget.userId});
+                                    },
+                                    child: Text('Yes'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context)
+                                          .pop(); // Close the dialog
+                                    },
+                                    child: Text('No'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        tooltip: 'Delete User',
+                        splashRadius: 20,
+                        color: Colors.red,
+                        constraints: BoxConstraints(),
+                        padding: EdgeInsets.zero,
+                        alignment: Alignment.center,
+                        visualDensity: VisualDensity(),
+                        iconSize: 20,
+                        splashColor: Colors.red[100],
+                        icon: Icon(
+                          Icons.delete,
+                          size: 20,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  )),
+                ],
               ),
               SizedBox(height: 8),
               Text(

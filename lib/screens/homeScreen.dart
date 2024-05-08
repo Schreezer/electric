@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dashboard'),
-        actions: [
+        leading: 
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () {
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-        ],
+        
         backgroundColor: Colors.teal,
       ),
       body: SafeArea(
@@ -126,8 +126,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
               billSummarySection(
-                perUnitCharge: selectedBill!.energyCharge.toDouble() / selectedBill!.totalUnitsConsumed.toDouble() ?? 0,
-                totalEnergyCharge: selectedBill?.energyCharge.toDouble() ?? 0,
+                perUnitCharge: selectedBill!.energyCharge.toDouble() ,
+                totalEnergyCharge: selectedBill?.totalAmount.toDouble() ?? 0,
                 meterRent: selectedBill?.meterRent.toDouble() ?? 0,
                 gstPercentage: selectedBill?.gst.toDouble() ?? 0,
                 totalAmount: selectedBill?.totalAmount ?? 0,
@@ -169,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
       items: bills.map<DropdownMenuItem<BillData>>((BillData bill) {
         return DropdownMenuItem<BillData>(
           value: bill,
-          child: Text("${bill.dateOfIssue}"),
+          child: Text("${DateTime.parse(bill.dateOfIssue.toString()).toUtc().add(Duration(hours: 5, minutes: 30)).toString().split(' ')[0]}"),
         );
       }).toList(),
       underline: Container(height: 2, color: Colors.teal),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import "package:electric/providers/userProvider.dart";
 import 'package:electric/resources/AuthMethods.dart';
 import 'package:electric/widgets/snackBar.dart';
@@ -8,6 +9,40 @@ import "package:flutter/material.dart";
 import 'package:provider/provider.dart';
 import 'package:floating_bubbles/floating_bubbles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+
+class AnimatedTitle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: 350.0, // Adjust the width to fit your design needs
+        child: DefaultTextStyle(
+          style: const TextStyle(
+            fontSize: 36.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          child: AnimatedTextKit(
+            animatedTexts: [
+              FadeAnimatedText(
+                'Electricity Billing System',
+                textAlign: TextAlign.center,
+                duration: Duration(seconds: 2),
+              ),
+              FadeAnimatedText(
+                'IIT Ropar',
+                textAlign: TextAlign.center,
+                duration: Duration(seconds: 2),
+              ),
+            ],
+            repeatForever: true,
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -109,7 +144,17 @@ bool emailValid() {
       await prefs.setString('userType', responseData['userType']);
       await Provider.refreshUser(false);
       // get the string jwt stored and print it to check:
-    Navigator.pushNamed(context, responseData['userType'].toLowerCase=='admin'?'/choice':'/home');
+      print("user type is");
+      print(responseData['userType'].toLowerCase());
+      late String extension;
+      if (responseData['userType'].toLowerCase() == 'admin') {
+        print("we are in the admin page");
+        extension = '/admin';
+      } else {
+        extension = '/home';
+      }
+    var currentContext = context;
+    Navigator.pushNamed(currentContext, responseData['userType'].toLowerCase() == 'admin' ? '/admin' : '/home');
     } catch (e) {
       showSnackBar(context, e.toString());
     }
@@ -157,11 +202,26 @@ bool emailValid() {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(height: 50),
+                  // Text(
+                  //   'Electricity Billing System IIT Ropar',
+                  //   textAlign: TextAlign.center,
+                  //   style: TextStyle(
+                  //     fontSize: 36,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: Colors.black,
+                  //   ),
+                  // ),
+                  Container(
+                    height: 100,
+                    child:AnimatedTitle(),
+                  ),
+                  
+                  const SizedBox(height: 30),
                   const Text(
                     'Login',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 36,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Colors.black,
                     ),

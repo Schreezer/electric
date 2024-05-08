@@ -25,8 +25,7 @@ void main() async {
   String? token = prefs.getString('jwt');
   String? userType = prefs.getString('userType')?.toLowerCase();
   String initialRoute =
-      token != null && !JwtDecoder.isExpired(token) ? '/home' : '/login';
-  initialRoute = userType== 'admin' ? '/choice' : initialRoute;
+      token != null && !JwtDecoder.isExpired(token) ? (userType=='admin'? '/admin':'/home') : '/login';
   print("the initial route is : ");
   print(initialRoute);
   print(token);
